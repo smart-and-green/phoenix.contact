@@ -5,6 +5,7 @@ debug(True)
 app = Bottle()
 
 #---------------------------------------------
+#----资源和库文件目录-------------------------------
 @app.route('/js/<path>')
 def server_js(path):
     return static_file(path, root='js')
@@ -19,7 +20,7 @@ def server_tpl(path):
 #---------------------------------------------
 
 
-""" test part
+""" 测试部分，可以删除
 """
 @app.route('/page')
 def page():
@@ -38,7 +39,7 @@ def ajaxtest():
     return (ret)
 
 
-""" home page, only this page
+""" 主页，唯一页面
 """
 @app.route('/index')
 def index():
