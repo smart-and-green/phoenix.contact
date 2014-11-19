@@ -66,17 +66,18 @@ def login():
     if (userid == "123456") and (password == "123456"):
         """ allow
         """
-        ret["allow"] = True
+        ret["success"] = True
+    elif (userid == "adolli") and (password == "123456"):
+        ret["success"] = True
     else:
         """ deny
         """
-        ret["allow"] = False
+        ret["success"] = False
     return ret
 
 @app.route('/checkUserid', method = 'POST')
 def checkuserid():
     userid = request.POST.get('userid')
-    print ("id" + userid)
     ret = {}
     if (userid == "123456"):
         ret["exist"] = True
@@ -88,8 +89,16 @@ def checkuserid():
 def signup():
     userid = request.POST.get('userid')
     password = request.POST.get('password')
+    username = request.POST.get('username')
     ret = {}
     ret["success"] = True
+    if (userid == "123456"):
+        ret["success"] = False
+        ret["reason"] = 1
+    elif (password == ""):
+        ret["success"] = False
+        ret["reason"] = 2
+        
     return ret
 
 app.run(host='localhost', port=8080)

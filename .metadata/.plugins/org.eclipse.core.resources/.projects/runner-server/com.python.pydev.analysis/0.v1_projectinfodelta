@@ -1,1 +1,15 @@
-DELSTRsrc.main
+INSTUPsrc.mainTest
+E:\github\phoenix.contact\runner-server\src\mainTest.py
+INFOS:&&3|1|2|0&&2|3|2|0&&2|4|2|0&&2|5|2|0&&2|6|2|0&&2|7|2|0&&2|8|2|0&&2|9|2|0&&2|10|2|0&&2|11|2|0&&2|12|2|0
+app=1
+src.mainTest=2
+test=6
+server_css=4
+index=9
+login=10
+signup=12
+ajaxtest=8
+checkuserid=11
+server_tpl=5
+page=7
+server_js=3

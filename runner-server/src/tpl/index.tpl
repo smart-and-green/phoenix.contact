@@ -33,37 +33,41 @@
     <body>
     	<div data-role="page" id="login">
             <script type="text/javascript">
+
+                function loginSubmit(userid, password) {
+                    // clear the login result
+                    $("#login-result").text("");
+                    
+                    $.ajax({
+                        url: "login",
+                        type: "post",
+                        data: {
+                            userid: userid,
+                            password: password
+                        },
+                        datatype: "json",
+                        async: true,
+                        success: function(result) {
+                            if (result["success"] == true) {
+                                window.location.href = "#user_home_page";
+                            } else {
+                                $("#login-result").text("user name or password error.");
+                            }
+                        },
+                        error: function(XMLHttpRequest, info, e){
+                            alert("error: " + XMLHttpRequest.readyState);
+                        }
+                    });
+                }
+
                 $(document).ready(function(){
                     $("#loginSubmit").click(function(){
-                        
-                        // clear the login result
-                        $("#login-result").text("");
-                        
                         var userid = $("#login-user-name").val();
                         var password = $("#login-password").val();
-                        
-                        $.ajax({
-                            url: "login",
-                            type: "post",
-                            data: {
-                                userid: userid,
-                                password: password
-                            },
-                            datatype: "json",
-                            async: true,
-                            success: function(result) {
-                                if (result["success"] == true) {
-                                    window.location.href = "#user_home_page";
-                                } else {
-                                    $("#login-result").text("user name or password error.");
-                                }
-                            },
-                            error: function(XMLHttpRequest, info, e){
-                                alert("error: " + XMLHttpRequest.readyState);
-                            }
-                        });
+                        loginSubmit(userid, password);
                     });
                 });
+
             </script>
     		<div data-role="header">
                 <a href="#about" data-rel="dialog" data-transition="pop"
@@ -198,9 +202,9 @@
                         async: true,
                         success: function(result) {
                             if (result["success"] == true) {
-                                window.location.href = "#login";
+                                // 注册成功后直接登陆
+                                loginSubmit(userid, password);
                             } else {
-                                $("#signup-result").text("signup error.");
                                 handleError(result["reason"]);
                             }
                         }
@@ -216,12 +220,16 @@
 
                         var check_ok = true;
 
-                        if (password != password_re && password != "") {
-                            $("#signup-result").text("passwords are not the same");
-                            $("#signup-result").show();
+                        if (password == "" || password_re == "") {
+                            $("#signup-password-tip").text("please input password.");
+                            $("#signup-password-tip").show();
+                            check_ok = false;
+                        } else if (password != password_re) {
+                            $("#signup-password-tip").text("passwords are not the same.");
+                            $("#signup-password-tip").show();
                             check_ok = false;
                         } else {
-                            $("#signup-result").hide();
+                            $("#signup-password-tip").hide();
                         }
 
 
@@ -230,7 +238,8 @@
                         }
 
                         if (name == "") {
-                            name = "new user";
+                            // 默认名字和id相同
+                            name = userid;
                         }
 
                         if (check_ok) {
@@ -274,6 +283,7 @@
                     <p id="signup-user-id-tip" style="display:none;"></p>
                     <input id="signup-password" type="password" data-clear-btn="true" placeholder="Password" />
                     <input id="signup-password-repeat" type="password" data-clear-btn="true" placeholder="Password repeat" />
+                    <p id="signup-password-tip" style="display:none;color:red;"></p>
                     <input id="signup-user-name" type="text" data-clear-btn="true" placeholder="name or nick name" />
                     <p id="signup-result" style="color:red;"></p>
                 </form>
