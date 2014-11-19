@@ -10,9 +10,9 @@ phoenix.contact
 
 服务器脚本路径: 
    
->   /runner-server/src/     服务器根目录
->                     /js   页面脚本
->                     /css  页面样式表
->                     /tpl  页面模版
+>   /runner-server/src/     服务器根目录<br>
+                     /js   页面脚本<br>
+                     /css  页面样式表<br>
+                     /tpl  页面模版<br>
                                  
                                  
