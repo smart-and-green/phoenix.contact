@@ -38,6 +38,5 @@
 			<button id='button' onclick='ajaxtest();'>button</button>
 		</div>
 		<p id="reply">---</p>
-                                <p>dddddddd</p>
 	</body>
 </html>

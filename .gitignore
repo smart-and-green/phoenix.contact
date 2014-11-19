@@ -15,8 +15,9 @@ gen/
 #metadata file
 .metadata
 .recommenders
-.metadata/
-.recommenders/
+.metadata/*
+.recommenders/*
+.gitignore
 
 # Gradle files
 .gradle/
