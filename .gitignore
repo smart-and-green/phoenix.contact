@@ -13,6 +13,8 @@ bin/
 gen/
 
 #metadata file
+.metadata
+.recommenders
 .metadata/
 .recommenders/
 
