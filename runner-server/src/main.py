@@ -1,11 +1,13 @@
-from bottle import run, request,response, post, get, template, route, static_file, redirect, Bottle, HTTPResponse, HTTPError,debug,SimpleTemplate,abort
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 
-debug(True)
+from bottle import run, request,response, post, get, template, route, static_file, redirect, Bottle, HTTPResponse, HTTPError,debug,SimpleTemplate,abort
 
 app = Bottle()
 
 """ @notice
         do not contain any chinese characters, only ASCII!
+        中文
 """
 
 #---------------------------------------------

@@ -52,7 +52,7 @@
                             }
                         },
                         error: function(XMLHttpRequest, info, e){
-                            alert("error: " + info);
+                            alert("error: " + XMLHttpRequest.readyState);
                         }
                     });
                     
