@@ -1,13 +1,15 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from bottle import run, request,response, post, get, template, route, static_file, redirect, Bottle, HTTPResponse, HTTPError,debug,SimpleTemplate,abort
+from bottle import run, request, response, post, get, template, route, static_file, redirect, Bottle, HTTPResponse, HTTPError,debug,SimpleTemplate,abort
 
 app = Bottle()
 
-""" @notice
-        do not contain any chinese characters, only ASCII!
-        中文
+""" 
+    @notice
+        do not contain any Chinese characters, only ASCII!
+    @suggest
+        do not use too much Chinese characters, please use English instead
+        so as to reduce encoding errors.
 """
 
 #---------------------------------------------
@@ -27,6 +29,10 @@ def server_tpl(path):
 
 """ test part
 """
+@app.route('/test')
+def test():
+    return "<body>hello world!</body>"
+    
 @app.route('/page')
 def page():
     print ("page")
@@ -44,7 +50,9 @@ def ajaxtest():
     return (ret)
 
 
-""" home page, only this page
+""" 
+    @brief
+        home page, only this page
 """
 @app.route('/index')
 def index():
@@ -65,4 +73,31 @@ def login():
         ret["allow"] = False
     return ret
 
+@app.route('/checkUserid', method = 'POST')
+def checkuserid():
+    userid = request.POST.get('userid')
+    print ("id" + userid)
+    ret = {}
+    if (userid == "123456"):
+        ret["exist"] = True
+    else:
+        ret["exist"] = False
+    return ret
+
+@app.route('/signup', method = 'POST')
+def signup():
+    userid = request.POST.get('userid')
+    password = request.POST.get('password')
+    ret = {}
+    ret["success"] = True
+    return ret
+
 app.run(host='localhost', port=8080)
+
+
+
+
+
+
+
+

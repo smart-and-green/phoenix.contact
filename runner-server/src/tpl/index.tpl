@@ -28,61 +28,43 @@
 
         <script type="text/javascript" src="js/api.camera.js"></script>
 
-        <script type="text/javascript">
-            $(document).ready(function(){
-                $("#loginSubmit").click(function(){
-                    var userid = $("#login-user-name").val();
-                    var password = $("#login-password").val();
-                    
-                    $.ajax({
-                        url: "login",
-                        type: "post",
-                        data: {
-                            userid: userid,
-                            password: password
-                        },
-                        datatype: "json",
-                        async: true,
-                        success: function(data) {
-                            if (data["allow"] == true) {
-                                $("#meg").text("ok!!!");
-                                window.location.href = "#user_home_page";
-                            } else {
-                                $("#meg").text("error!!!");
-                            }
-                        },
-                        error: function(XMLHttpRequest, info, e){
-                            alert("error: " + XMLHttpRequest.readyState);
-                        }
-                    });
-                    
-                });
-            });
-
-            function read(a) {
-                $("#qrContent").text(a);
-            }
-
-            function captureAndDecode() {
-                navigator.camera.getPicture(function(image) {
-                    qrcode.callback = read; 
-                    qrcode.decode("data:image/jpeg;base64," + image);
-                    $("#qrContent").text("decoding");
-                }, function(e) {
-                    console.log("camera error: " + e);
-                }, { 
-                    quality: 20,
-                    destinationType: destinationType.DATA_URL,
-                    targetWidth: 640,
-                    targetHeight: 480
-                }); 
-            }
-            
-        </script>
 	</head>
 
     <body>
     	<div data-role="page" id="login">
+            <script type="text/javascript">
+                $(document).ready(function(){
+                    $("#loginSubmit").click(function(){
+                        
+                        // clear the login result
+                        $("#login-result").text("");
+                        
+                        var userid = $("#login-user-name").val();
+                        var password = $("#login-password").val();
+                        
+                        $.ajax({
+                            url: "login",
+                            type: "post",
+                            data: {
+                                userid: userid,
+                                password: password
+                            },
+                            datatype: "json",
+                            async: true,
+                            success: function(result) {
+                                if (result["success"] == true) {
+                                    window.location.href = "#user_home_page";
+                                } else {
+                                    $("#login-result").text("user name or password error.");
+                                }
+                            },
+                            error: function(XMLHttpRequest, info, e){
+                                alert("error: " + XMLHttpRequest.readyState);
+                            }
+                        });
+                    });
+                });
+            </script>
     		<div data-role="header">
                 <a href="#about" data-rel="dialog" data-transition="pop"
                     class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all">About</a>
@@ -98,8 +80,7 @@
                     <a href="#sign_up_page" class="ui-btn ui-corner-all">Signup</a>
                 </form>
 
-                <p id="meg">---</p>
-                <a href="#user_home_page">user-preview</a>
+                <p id="login-result" style="color:red;"></p>
             </div>
     	</div>
 
@@ -114,6 +95,26 @@
         </div>
 
         <div data-role="page" id="user_home_page">
+            <script type="text/javascript">
+                function read(a) {
+                    $("#qrContent").text(a);
+                }
+
+                function captureAndDecode() {
+                    navigator.camera.getPicture(function(image) {
+                        qrcode.callback = read; 
+                        qrcode.decode("data:image/jpeg;base64," + image);
+                        $("#qrContent").text("decoding");
+                    }, function(e) {
+                        console.log("camera error: " + e);
+                    }, { 
+                        quality: 20,
+                        destinationType: destinationType.DATA_URL,
+                        targetWidth: 640,
+                        targetHeight: 480
+                    }); 
+                }
+            </script>
             <div data-role="header">
                 <a href="#login"
                     class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all">Sign out</a>
@@ -162,14 +163,101 @@
 
         <div data-role="page" id="sign_up_page">
             <script type="text/javascript">
-                $(document).ready(function(){
-                    $("#signup-submit").click(function(){
-                        if ($("#sugnup-password").val() != $("#sugnup-password-repeat").val()) {
-                            $("#password-check").text("passwords are not the same");
-                            $("#password-check").show();
-                        } else {
-                            $("#password-check").hide();
+
+                var useridExist = false;
+
+                function checkUserid(userid_, if_exist, otherwise) {
+                    $.ajax({
+                        url: "checkUserid",
+                        type: "post",
+                        data: {
+                            userid: userid_
+                        },
+                        datatype: "json",
+                        async: true,
+                        success: function(result) {
+                            if (result["exist"]) {
+                                if_exist();
+                            } else {
+                                otherwise();
+                            }
                         }
+                    }); 
+                }
+
+                function submitSignUpInfo(userid, password, userName, handleError) {
+                    $.ajax({
+                        url: "signup",
+                        type: "post",
+                        data: {
+                            userid: userid,
+                            password: password,
+                            userName: userName
+                        },
+                        datatype: "json",
+                        async: true,
+                        success: function(result) {
+                            if (result["success"] == true) {
+                                window.location.href = "#login";
+                            } else {
+                                $("#signup-result").text("signup error.");
+                                handleError(result["reason"]);
+                            }
+                        }
+                    });
+                }
+
+                $(document).ready(function() {
+                    $("#signup-submit").click(function() {
+                        var userid = $("#signup-user-id").val();
+                        var password = $("#signup-password").val();
+                        var password_re = $("#signup-password-repeat").val();
+                        var name = $("#signup-user-name").val();
+
+                        var check_ok = true;
+
+                        if (password != password_re && password != "") {
+                            $("#signup-result").text("passwords are not the same");
+                            $("#signup-result").show();
+                            check_ok = false;
+                        } else {
+                            $("#signup-result").hide();
+                        }
+
+
+                        if (userid == "") {
+                            check_ok = false;
+                        }
+
+                        if (name == "") {
+                            name = "new user";
+                        }
+
+                        if (check_ok) {
+                            submitSignUpInfo(userid, password, name, function(reason) {
+                                // handle the error reason
+                                if (reason == 1) {
+                                    $("#signup-result").text("user name exist, please change another.");
+                                } else if (reason == 2) {
+                                    $("#signup-result").text("some error occured, please contact the administrator.");
+                                }
+                            });
+                        }
+                    });
+
+                    $("#signup-user-id").blur(function() {
+                        checkUserid($(this).val(),
+                            function() {
+                                $("#signup-user-id-tip").text("this user name has been used, please change another.");
+                                $("#signup-user-id-tip").css("color", "red");
+                                $("#signup-user-id-tip").slideDown();
+                            },
+                            function() {
+                                $("#signup-user-id-tip").text("ok! you can use it.");
+                                $("#signup-user-id-tip").css("color", "green");
+                                $("#signup-user-id-tip").slideDown();
+                            }
+                        );
                     });
                 });
             </script>
@@ -182,10 +270,12 @@
             </div>
             <div data-role="content">
                 <form>
-                    <input id="sugnup-user-name" type="text" data-clear-btn="true" placeholder="User name" />
-                    <input id="sugnup-password" type="password" data-clear-btn="true" placeholder="Password" />
-                    <input id="sugnup-password-repeat" type="password" data-clear-btn="true" placeholder="Password repeat" />
-                    <p id="password-check" style="color:red;"></p>
+                    <input id="signup-user-id" type="text" data-clear-btn="true" placeholder="User name" />
+                    <p id="signup-user-id-tip" style="display:none;"></p>
+                    <input id="signup-password" type="password" data-clear-btn="true" placeholder="Password" />
+                    <input id="signup-password-repeat" type="password" data-clear-btn="true" placeholder="Password repeat" />
+                    <input id="signup-user-name" type="text" data-clear-btn="true" placeholder="name or nick name" />
+                    <p id="signup-result" style="color:red;"></p>
                 </form>
             </div>
         </div>
