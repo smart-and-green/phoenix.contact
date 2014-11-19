@@ -61,6 +61,6 @@ def login():
         """ deny
         """
         ret["allow"] = False
-    return ret
+    return {}
 
 app.run(host='localhost', port=8080)

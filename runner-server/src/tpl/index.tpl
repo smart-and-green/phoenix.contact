@@ -35,7 +35,7 @@
                     var password = $("#login-password").val();
                     
                     $.ajax({
-                        url: "http://127.0.0.1:8080/resignaaa",
+                        url: "login",
                         type: "post",
                         data: {
                             userid: userid,
@@ -44,9 +44,9 @@
                         datatype: "json",
                         async: true,
                         success: function(data) {
-                            alert("echo: " + data);
-                            if (data["meg"]) {
+                            if (data["allow"] == true) {
                                 $("#meg").text("ok!!!");
+                                window.location.href = "#user_home_page";
                             } else {
                                 $("#meg").text("error!!!");
                             }
@@ -55,6 +55,7 @@
                             alert("error: " + info);
                         }
                     });
+                    
                 });
             });
 
@@ -81,7 +82,7 @@
 	</head>
 
     <body>
-    	<div data-role="page">
+    	<div data-role="page" id="login">
     		<div data-role="header">
                 <a href="#about" data-rel="dialog" data-transition="pop"
                     class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all">About</a>
@@ -114,7 +115,7 @@
 
         <div data-role="page" id="user_home_page">
             <div data-role="header">
-                <a href="index.html" data-rel="back"
+                <a href="#login"
                     class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all">Sign out</a>
                 <h1 id="userNameHead">adolli</h1>
                 <a href="#"

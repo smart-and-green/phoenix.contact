@@ -4,10 +4,6 @@ debug(True)
 
 app = Bottle()
 
-""" @notice
-        do not contain any chinese characters, only ASCII!
-"""
-
 #---------------------------------------------
 @app.route('/js/<path>')
 def server_js(path):
@@ -47,20 +43,5 @@ def ajaxtest():
 @app.route('/index')
 def index():
     return template("tpl/index")
-
-@app.route('/login', method = 'POST')
-def login():
-    userid = request.POST.get('userid')
-    password = request.POST.get('password')
-    ret = {}
-    if (userid == "123456") and (password == "123456"):
-        """ allow
-        """
-        ret["allow"] = True
-    else:
-        """ deny
-        """
-        ret["allow"] = False
-    return ret
 
 app.run(host='localhost', port=8080)
