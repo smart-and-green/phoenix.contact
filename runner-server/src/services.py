@@ -28,7 +28,7 @@ def login():
     password = request.POST.get('password')
     ret = {}
     ret["success"] = False
-    config = {'user':'root', 'password':'admin','host':'localhost',
+    config = {'user':'phoenix', 'password':'admin','host':'localhost',
               'database':'phoenix','charset':'utf8','raw':True}#初始化数据库参数
     cnx = connect(**config)#新建连接   
     cursor=cnx.cursor()#新建游标

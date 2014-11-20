@@ -54,6 +54,11 @@
                                 // 自动记录上次登陆的记录，下次就不用再输入密码了
                                 window.localStorage.setItem("savedUserid", userid);
                                 window.localStorage.setItem("savedPassword", password);
+
+                                $("#userNameHead").text(result["name"]);
+                                $("#exercise_time").text(result["exercise_time"]);
+                                $("#Energy_consumption").text(result["Energy_consumption"]);
+                                $("#Electricity_generation").text(result["Electricity_generation"]);
                             } else {
                                 $("#login-result").text("user name or password error.");
                             }
@@ -166,12 +171,12 @@
                     <tbody>
                         <tr>
                             <td>Total energy</td>
-                            <td>100 kWh</td>
+                            <td><span id="Electricity_generation">100</span> kWh</td>
                             <td>1</td>
                         </tr>
                         <tr>
                             <td>Fitness time</td>
-                            <td>10h 12min</td>
+                            <td><span id="exercise_time">10h 12min</span></td>
                             <td>1</td>
                         </tr>
                         <tr>
@@ -180,8 +185,8 @@
                             <td>1</td>
                         </tr>
                         <tr>
-                            <td>---</td>
-                            <td>---</td>
+                            <td>Energy Consumption</td>
+                            <td><span id="Energy_consumption"></td>
                             <td>1</td>
                         </tr>
                      </tbody>
