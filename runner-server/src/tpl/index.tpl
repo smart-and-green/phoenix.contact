@@ -50,6 +50,10 @@
                         success: function(result) {
                             if (result["success"] == true) {
                                 window.location.href = "#user_home_page";
+
+                                // 自动记录上次登陆的记录，下次就不用再输入密码了
+                                window.localStorage.setItem("savedUserid", userid);
+                                window.localStorage.setItem("savedPassword", password);
                             } else {
                                 $("#login-result").text("user name or password error.");
                             }
@@ -60,12 +64,25 @@
                     });
                 }
 
+                function autoLogin() {
+                    var userid = window.localStorage.getItem("savedUserid");
+                    if (userid != null || userid != "") {
+                        var password = window.localStorage.getItem("savedPassword");
+                        
+                        // 提示一下当前登陆的帐号
+                        $("#login-user-name").text(userid);
+                        loginSubmit(userid, password);
+                    }
+                }
+
                 $(document).ready(function(){
                     $("#loginSubmit").click(function(){
                         var userid = $("#login-user-name").val();
                         var password = $("#login-password").val();
                         loginSubmit(userid, password);
                     });
+
+                    autoLogin();
                 });
 
             </script>
@@ -118,9 +135,20 @@
                         targetHeight: 480
                     }); 
                 }
+
+                function signOut() {
+                    // 登出的时候自动清除保存的帐号和密码
+                    window.localStorage.setItem("savedUserid", null);
+                    window.localStorage.setItem("savedPassword", null);
+                }
+
+                $(document).ready(function() {
+                    $("#signOutBtn").click(signOut);
+                });
+
             </script>
             <div data-role="header">
-                <a href="#login"
+                <a href="#login" id="signOutBtn"
                     class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all">Sign out</a>
                 <h1 id="userNameHead">adolli</h1>
                 <a href="#"
