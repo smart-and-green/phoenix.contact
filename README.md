@@ -10,9 +10,10 @@ phoenix.contact
 
 服务器脚本路径: 
    
-      /runner-server/src/     服务器根目录，py脚本目前放在这里
-                        /js   页面脚本
-                        /css  页面样式表
-                        /tpl  页面模版
+      /runner-server/src/     服务器根目录，py脚本目前放在这里(sunjunwei11)
+                        /database 数据库文件目录(sunjunwei11)
+                        /js   页面脚本(adolli)
+                        /css  页面样式表(adolli)
+                        /tpl  页面模版(adolli)
                                  
                                  
