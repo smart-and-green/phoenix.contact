@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>login</title>
+        <title>runner</title>
         <meta charset="utf-8" />
-        <link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css" />
+        <link rel="stylesheet" type="text/css" href="css/jquery.mobile-1.4.5.min.css" />
+        <link rel="stylesheet" type="text/css" href="css/runner.css" />
         <script type="text/javascript" src="js/jquery-1.8.3.min.js"></script>
         <script type="text/javascript" src="js/jquery.mobile-1.4.5.min.js"></script>
         <script type="text/javascript" src="js/cordova.js"></script>
@@ -31,6 +32,8 @@
 	</head>
 
     <body>
+
+
     	<div data-role="page" id="login">
             <script type="text/javascript">
 
@@ -117,24 +120,36 @@
             <div data-role="content">
                 <p>App for user to access our system. Thanks.</p>
             </div>
-
         </div>
 
         <div data-role="page" id="user_home_page">
             <script type="text/javascript">
-                function read(a) {
-                    $("#qrContent").text(a);
+                
+                // 处理解码后的qrcode，从中读取运动设备信息
+                // 记录运动设备信息和运动量信息，并显示
+                function startEx_qrcodeProc(code) {
+                    alert(code);
+
+                    // 如果qrcode读取成功，处理完信息后将按钮转变成停止功能
+                    $("#start-exercise-btn").text("Stop exercising");
+                }
+                function stopEx_qrcodeProc(code) {
+                    alert(code);
+
+                    // 如果qrcode读取成功，处理完信息后将按钮转变成停止功能
+                    $("#start-exercise-btn").text("Start to exercise");
                 }
 
-                function captureAndDecode() {
+                function captureAndDecode(fnCallback) {
                     navigator.camera.getPicture(function(image) {
-                        qrcode.callback = read; 
+                        qrcode.callback = fnCallback; 
                         qrcode.decode("data:image/jpeg;base64," + image);
                         $("#qrContent").text("decoding");
                     }, function(e) {
                         console.log("camera error: " + e);
+                        alert("camera error because: " + e);
                     }, { 
-                        quality: 20,
+                        quality: 25,
                         destinationType: destinationType.DATA_URL,
                         targetWidth: 640,
                         targetHeight: 480
@@ -149,6 +164,16 @@
 
                 $(document).ready(function() {
                     $("#signOutBtn").click(signOut);
+                    $("#start-exercise-btn").click(function() {
+                        if ($(this).val() == "Start to exercise") {
+                            captureAndDecode(startEx_qrcodeProc);
+                        } else if ($(this).val() == "Stop exercising") {
+                            captureAndDecode(stopEx_qrcodeProc);
+                        }
+
+                        // 刚按下按钮拍照后按钮显示请等待，处理完数据才显示start ex或者stop ex
+                        $(this).text("please wait...")
+                    });
                 });
 
             </script>
@@ -157,7 +182,7 @@
                     class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all">Sign out</a>
                 <h1 id="userNameHead">adolli</h1>
                 <a href="#"
-                    class="ui-btn-right ui-btn ui-btn-inline ui-mini ui-corner-all">Setting</a>
+                    class="ui-btn-right ui-btn ui-btn-inline ui-mini ui-corner-all">History</a>
             </div>
             <div data-role="content">
                 <table data-role="table" id="table-column-toggle" data-mode="columntoggle" class="ui-responsive table-stroke">
@@ -180,20 +205,59 @@
                             <td>1</td>
                         </tr>
                         <tr>
-                            <td>CO2 reduced</td>
-                            <td>1.2 kg</td>
+                            <td>CO<small>2</small> reduced</td>
+                            <td><span id="co2_reduced"></span> kg</td>
                             <td>1</td>
                         </tr>
                         <tr>
                             <td>Energy Consumption</td>
-                            <td><span id="Energy_consumption"></td>
+                            <td><span id="Energy_consumption"></span> kJ</td>
                             <td>1</td>
                         </tr>
                      </tbody>
                 </table>
 
-                <button onclick="captureAndDecode();">Start to exercise</button><br>
-                <p id="qrContent"></p>
+                <button id="start-exercise-btn">Start to exercise</button><br>
+                <div id="Exercise-equipment-nfo">
+                    <p>Exercise equipment information:</p>
+                    <p class="developer-markdown">only displayed when starting exercising</p>
+                    <ul>
+                        <li>Exercise place: gym 001</li>
+                        <li>equipment type: bike</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <p class="developer-markdown">only displayed when finished exercising</p>
+                    <strong>This exercise</strong>
+                    <table data-role="table" data-mode="column" class="ui-responsive table-stroke">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th data-priority="1">Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Total energy</td>
+                                <td><span id="Electricity_generation_thisTime">100</span> kWh</td>
+                            </tr>
+                            <tr>
+                                <td>Fitness time</td>
+                                <td><span id="exercise_time_thisTime">10h 12min</span></td>
+                            </tr>
+                            <tr>
+                                <td>CO<small>2</small> reduced</td>
+                                <td><span id="co2_reduced_thisTime"></span> kg</td>
+                            </tr>
+                            <tr>
+                                <td>Energy Consumption</td>
+                                <td><span id="Energy_consumption_thisTime"></span> kJ</td>
+                            </tr>
+                         </tbody>
+                    </table>
+                    <button id="share-this-exercise-btn">Share</button><br>
+                </div>
                 
             </div>
         </div>
@@ -201,25 +265,32 @@
         <div data-role="page" id="sign_up_page">
             <script type="text/javascript">
 
-                var useridExist = false;
+                function isUseridValidate(userid) {
+                    return /^[a-zA-Z][a-zA-Z0-9_]{2,16}$/.test(userid);
+                }
 
-                function checkUserid(userid_, if_exist, otherwise) {
-                    $.ajax({
-                        url: "checkUserid",
-                        type: "post",
-                        data: {
-                            userid: userid_
-                        },
-                        datatype: "json",
-                        async: true,
-                        success: function(result) {
-                            if (result["exist"]) {
-                                if_exist();
-                            } else {
-                                otherwise();
+                function checkUserid(userid_, if_exist, otherwise, formatInvalid) {
+                    // 先检查userid是否符合表达式要求
+                    if (!isUseridValidate(userid_)) {
+                        formatInvalid();
+                    } else {
+                        $.ajax({
+                            url: "checkUserid",
+                            type: "post",
+                            data: {
+                                userid: userid_
+                            },
+                            datatype: "json",
+                            async: true,
+                            success: function(result) {
+                                if (result["exist"]) {
+                                    if_exist();
+                                } else {
+                                    otherwise();
+                                }
                             }
-                        }
-                    }); 
+                        }); 
+                    }
                 }
 
                 function submitSignUpInfo(userid, password, userName, handleError) {
@@ -253,16 +324,25 @@
 
                         var check_ok = true;
 
+                        // check userid
+                        if (!isUseridValidate(userid)) {
+                            check_ok = false;
+                            $("#signup-user-id-tip").text("User name can only contain a-z, A-Z, 0-9 and underline, and starts with letter");
+                            $("#signup-user-id-tip").css("color", "red");
+                            $("#signup-user-id-tip").slideDown();
+                        }
+
+                        // check password
                         if (password == "" || password_re == "") {
                             $("#signup-password-tip").text("please input password.");
-                            $("#signup-password-tip").show();
+                            $("#signup-password-tip").slideDown();
                             check_ok = false;
                         } else if (password != password_re) {
                             $("#signup-password-tip").text("passwords are not the same.");
-                            $("#signup-password-tip").show();
+                            $("#signup-password-tip").slideDown();
                             check_ok = false;
                         } else {
-                            $("#signup-password-tip").hide();
+                            $("#signup-password-tip").slideUp();
                         }
 
 
@@ -286,20 +366,34 @@
                             });
                         }
                     });
-
+                    
                     $("#signup-user-id").blur(function() {
                         checkUserid($(this).val(),
                             function() {
-                                $("#signup-user-id-tip").text("this user name has been used, please change another.");
+                                $("#signup-user-id-tip").text("This user name has been used, please change another.");
                                 $("#signup-user-id-tip").css("color", "red");
                                 $("#signup-user-id-tip").slideDown();
                             },
                             function() {
-                                $("#signup-user-id-tip").text("ok! you can use it.");
+                                $("#signup-user-id-tip").text("Ok! you can use it.");
                                 $("#signup-user-id-tip").css("color", "green");
+                                $("#signup-user-id-tip").slideDown();
+                            },
+                            function() {
+                                $("#signup-user-id-tip").text("User name can only contain a-z, A-Z, 0-9 and underline, and starts with letter");
+                                $("#signup-user-id-tip").css("color", "red");
                                 $("#signup-user-id-tip").slideDown();
                             }
                         );
+                    });
+
+                    $("#signup-password-repeat").blur(function() {
+                        if ($(this).val() != $("#signup-password").val()) {
+                            $("#signup-password-tip").text("passwords are not the same.");
+                            $("#signup-password-tip").slideDown();
+                        } else {
+                            $("#signup-password-tip").slideUp();
+                        }
                     });
                 });
             </script>
@@ -313,12 +407,12 @@
             <div data-role="content">
                 <form>
                     <input id="signup-user-id" type="text" data-clear-btn="true" placeholder="User name" />
-                    <p id="signup-user-id-tip" style="display:none;"></p>
+                    <p id="signup-user-id-tip" style="display:none;" class="tips-text"></p>
                     <input id="signup-password" type="password" data-clear-btn="true" placeholder="Password" />
                     <input id="signup-password-repeat" type="password" data-clear-btn="true" placeholder="Password repeat" />
-                    <p id="signup-password-tip" style="display:none;color:red;"></p>
+                    <p id="signup-password-tip" style="display:none;color:red;" class="tips-text"></p>
                     <input id="signup-user-name" type="text" data-clear-btn="true" placeholder="name or nick name" />
-                    <p id="signup-result" style="color:red;"></p>
+                    <p id="signup-result" style="color:red;" class="tips-text"></p>
                 </form>
             </div>
         </div>
