@@ -32,26 +32,71 @@ def login():
               'database':'phoenix','charset':'utf8','raw':True}#初始化数据库参数
     cnx = connect(**config)#新建连接   
     cursor=cnx.cursor()#新建游标
-    cursor.execute('''select name FROM user_information ''')
-    names = cursor.fetchall() 
-    print names   
-    for k in names:
+    cursor.execute('''select user_id FROM user_information ''')
+    user_ids = cursor.fetchall() 
+    print user_ids  
+    for k in user_ids:
         if k[0]==userid:
-            cursor.execute('''select * FROM user_information where user_information.name=%(phoenix.name)s''',{"phoenix.name":userid})
+            cursor.execute('''select * FROM user_information where user_information.user_id=%(phoenix.user_id)s''',{"phoenix.user_id":userid})
             information = cursor.fetchall()
             print information
             for k in information:                
                 if k[1]==password:                     
                     ret["success"] = True
-                    ret["name"] = userid
+                    ret["user_id"] = userid
                     ret["password"] = password
-                    ret["exercise_time"] = k[2]
-                    ret["Energy_consumption"] = k[3]
-                    ret["Electricity_generation"] = k[4]
+                    ret["name"] = k[2]
+                    ret["exercise_time"] = k[3]
+                    ret["Energy_consumption"] = k[4]
+                    ret["Electricity_generation"] = k[5]
                     print ret
                 
     cursor.close()
     return ret
+
+@app.route('/checkUserid', method = 'POST')
+def checkuserid():
+    userid = request.POST.get('userid')
+    ret = {}
+    ret["exist"] = False
+    config = {'user':'phoenix', 'password':'admin','host':'localhost',
+              'database':'phoenix','charset':'utf8','raw':True}#初始化数据库参数
+    cnx = connect(**config)#新建连接   
+    cursor=cnx.cursor()#新建游标
+    cursor.execute('''select user_id FROM user_information ''')
+    user_ids = cursor.fetchall()
+    print "check if this user_id be used" 
+    print user_ids 
+    for k in user_ids: 
+        if k[0]==userid:
+            ret["exist"] = True
+            print "this user_id is be used"
+        
+    return ret
+
+@app.route('/signup', method = 'POST')
+def signup():
+    userid = request.POST.get('userid')
+    password = request.POST.get('password')
+    username = request.POST.get('userName')
+    ret = {}
+    ret["success"] = True
+    config = {'user':'phoenix', 'password':'admin','host':'localhost',
+              'database':'phoenix','charset':'utf8','raw':True}#初始化数据库参数
+    cnx = connect(**config)#新建连接   
+    cursor=cnx.cursor()#新建游标
+    cursor.execute('''select user_id FROM user_information ''')
+    user_ids = cursor.fetchall()
+    for k in user_ids:
+        if k[0] == userid:
+            ret["success"] = False
+            print "this user_id exit,can not signup"
+            return ret
+   
+    cursor.execute("INSERT INTO user_information (user_id,password,name) VALUES (%s,%s,%s)",(userid,password,username))
+    cnx.commit()  
+    cursor.close()
+    return ret  
 
 
 app.run(host='localhost', port=8080)

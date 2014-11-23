@@ -25,11 +25,12 @@ DROP TABLE IF EXISTS `user_information`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `user_information` (
-  `name` varchar(255) DEFAULT NULL,
+  `user_id` varchar(255) DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
-  `exercise_time` time DEFAULT NULL,
-  `Energy_consumption` varchar(255) DEFAULT NULL,
-  `Electricity_generation` varchar(255) DEFAULT NULL
+  `name` varchar(255) DEFAULT NULL,
+  `exercise_time` time DEFAULT '00:00:00',
+  `Energy_consumption` varchar(255) DEFAULT '0',
+  `Electricity_generation` varchar(255) DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -39,7 +40,7 @@ CREATE TABLE `user_information` (
 
 LOCK TABLES `user_information` WRITE;
 /*!40000 ALTER TABLE `user_information` DISABLE KEYS */;
-INSERT INTO `user_information` VALUES ('jim','123456','00:12:53','1074J','379kw.h'),('lucy','123456','00:24:56','897J','265kw.h');
+INSERT INTO `user_information` VALUES ('jim','123456','name_jim','00:12:53','1074J','379kw.h'),('lucy','123456','name_lucy','00:24:56','897J','265kw.h'),('jack','123456','name_jack','00:21:54','287J','198kw.h'),('michael','123456','name_michael','00:17:27','297J','398kw.h'),('sun','123456',NULL,'00:00:00','0','0'),('jun','123456','sunshine','00:00:00','0','0');
 /*!40000 ALTER TABLE `user_information` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -52,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-11-20 18:59:53
+-- Dump completed on 2014-11-23 14:58:54
