@@ -126,26 +126,47 @@
         <div data-role="page" id="user_home_page">
             <script type="text/javascript">
                 
+                var IntvId;
+                var StartSecStamp = 0;
+
+                function updateDurationDisp() {
+                    var myDate = new Date();
+                    var currentMillis = myDate.getTime();
+                    var currentSecCount = currentMillis / 1000 - StartSecStamp;
+                    var currentMinCount = currentSecCount / 60;
+                    $("#exercise-duration-hour").text(parseInt(currentMinCount / 60));
+                    $("#exercise-duration-min").text(parseInt(currentMinCount % 60));
+                    $("#duration-displayer").fadeIn();
+                }
+
+                // 调用了此回调函数表示二维码解码成功
                 // 处理解码后的qrcode，从中读取运动设备信息
                 // 记录运动设备信息和运动量信息，并显示
+                // 同时维护按钮内容的显示
                 function startEx_qrcodeProc(code) {
                     alert(code);
 
                     // 如果qrcode读取成功，处理完信息后将按钮转变成停止功能
                     $("#start-exercise-btn").text("Stop exercising");
+
+                    var myDate = new Date();
+                    var currentMillis = myDate.getTime();
+                    StartSecStamp = currentMillis / 1000;
+                    IntvId = window.setInterval(updateDurationDisp, 1000);
                 }
                 function stopEx_qrcodeProc(code) {
                     alert(code);
 
                     // 如果qrcode读取成功，处理完信息后将按钮转变成停止功能
                     $("#start-exercise-btn").text("Start to exercise");
+
+                    window.clearInterval(IntvId);
                 }
 
                 function captureAndDecode(fnCallback) {
                     navigator.camera.getPicture(function(image) {
                         qrcode.callback = fnCallback; 
                         qrcode.decode("data:image/jpeg;base64," + image);
-                        $("#qrContent").text("decoding");
                     }, function(e) {
                         console.log("camera error: " + e);
                         alert("camera error because: " + e);
@@ -163,6 +184,64 @@
                     window.localStorage.setItem("savedPassword", null);
                 }
 
+
+                function uploadExRecord(userid, exerciseData, equipmentid) {
+                    $.ajax({
+                        url: "uploadExRecord",
+                        type: "post",
+                        data: {
+                            userid: userid,
+                            exData: exerciseData,
+                            equipmentid: equipmentid
+                        },
+                        datatype: "json",
+                        async: true,
+                        success: function(result) {
+                            if (result["success"]) {
+                                alert("upload ok!");
+                            } else {
+                                alert("upload fail");
+                            }
+                        }
+                    });
+                }
+
+
+                function getUserLast10ExHistory(userid) {
+                    $.ajax({
+                        url: "getUserLast10History",
+                        type: "post",
+                        data: {
+                            userid: userid
+                        },
+                        datatype: "json",
+                        async: true,
+                        success: function(result) {
+                            if (result["lastIndex"] != 0) {
+                                alert("you have " + result["lastIndex"] + " exercise records");
+
+                                var recordStr = "";
+                                for (record in result["exDataType"]) {
+                                    recordStr += "\
+                                                <tr id='xxx'>\
+                                                    <td>2014-11-23</td>\
+                                                    <td>1h 21min</td>\
+                                                    <td>12 kCal</td>\
+                                                    <td>122 kJ</td>\
+                                                    <td>3 kg</td>\
+                                                </tr>";
+                                }
+                                $("#history-table-body").html(recordStr);
+                               
+                                window.location.href = "#user_exercise_history";
+                            } else {
+                                alert("you don't have any exercise records.");
+                            }
+                        }
+                    });
+                }
+
+                
                 $(document).ready(function() {
                     $("#signOutBtn").click(signOut);
                     $("#start-exercise-btn").click(function() {
@@ -172,8 +251,19 @@
                             captureAndDecode(stopEx_qrcodeProc);
                         }
 
-                        // 刚按下按钮拍照后按钮显示请等待，处理完数据才显示start ex或者stop ex
-                        $(this).text("please wait...")
+                        // 刚按下按钮拍照后将按钮禁用，3秒后恢复
+                        // 是否成功获取二维码要等待解码结果，解码结果回调函数会处理按钮显示信息。
+                        $(this).attr("disabled", true);
+                        window.setTimeout(function() {
+                            $("#start-exercise-btn").removeAttr("disabled");
+                        }, 3000);
+                    });
+
+                    $("#user-ex-history-btn").click(function() {
+
+                        // 需要通过session获取userid
+                        var userid = "default_userid";
+                        getUserLast10ExHistory(userid);
                     });
                 });
 
@@ -181,12 +271,12 @@
             <div data-role="header">
                 <a href="#login" id="signOutBtn"
                     class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all">Sign out</a>
-                <h1 id="userNameHead">adolli</h1>
-                <a href="#user_exercise_history"
+                <h1 id="userNameHead"></h1>
+                <a href="#" id="user-ex-history-btn"
                     class="ui-btn-right ui-btn ui-btn-inline ui-mini ui-corner-all">History</a>
             </div>
             <div data-role="content">
-                <table data-role="table" id="table-column-toggle" data-mode="columntoggle" class="ui-responsive table-stroke">
+                <table data-role="table" data-mode="columntoggle" class="ui-responsive table-stroke">
                     <thead>
                         <tr>
                             <th>Item</th>
@@ -219,17 +309,24 @@
                 </table>
 
                 <button id="start-exercise-btn">Start to exercise</button><br>
+                
+                <p class="developer-markdown">the fallowing content only displayed when starting exercising</p>
+                <div id="duration-displayer" style="color:blue;font-size:5em;">
+                    <center>
+                        <span id="exercise-duration-hour">0</span><small>h </small>
+                        <span id="exercise-duration-min">0</span><small>min </small>
+                    </center>
+                </div>
                 <div id="Exercise-equipment-nfo">
                     <p>Exercise equipment information:</p>
-                    <p class="developer-markdown">only displayed when starting exercising</p>
                     <ul>
                         <li>Exercise place: gym 001</li>
                         <li>equipment type: bike</li>
                     </ul>
                 </div>
 
+                <p class="developer-markdown">only displayed when finished exercising</p>
                 <div>
-                    <p class="developer-markdown">only displayed when finished exercising</p>
                     <strong>This exercise</strong>
                     <table data-role="table" data-mode="column" class="ui-responsive table-stroke">
                         <thead>
@@ -435,7 +532,7 @@
                             <th data-priority="4">CO<small>2</small> reduced</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="history-table-body">
                         <tr>
                             <td>2014-11-23</td>
                             <td>1h 21min</td>
@@ -452,6 +549,17 @@
                         </tr>
                      </tbody>
                 </table>
+            </div>
+        </div>
+
+        <div data-role="page" id="user_exercise_history_detail">
+            <div data-role="header">
+                <a href="#user_home_page" data-rel="back"
+                    class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all">Back</a>
+                <h1>[Data(e.g. 2014-11-24)]</h1>
+            </div>
+            <div data-role="content">
+               
             </div>
         </div>
     </body>
