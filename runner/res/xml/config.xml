@@ -33,7 +33,9 @@
     <access origin="*"/>
 
     <!-- <content src="http://mysite.com/myapp.html" /> for external pages -->
-    <content src="index.html" />
+    
+    <!-- for server -->
+    <content src="http://192.168.1.199:8080/index" />
 
     <preference name="loglevel" value="DEBUG" />
     <!--

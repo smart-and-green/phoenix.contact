@@ -7,6 +7,7 @@
         <link rel="stylesheet" type="text/css" href="css/runner.css" />
         <script type="text/javascript" src="js/jquery-1.8.3.min.js"></script>
         <script type="text/javascript" src="js/jquery.mobile-1.4.5.min.js"></script>
+        
         <script type="text/javascript" src="js/cordova.js"></script>
 
         <script type="text/javascript" src="js/qr/src/grid.js"></script>
@@ -181,7 +182,7 @@
                 <a href="#login" id="signOutBtn"
                     class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all">Sign out</a>
                 <h1 id="userNameHead">adolli</h1>
-                <a href="#"
+                <a href="#user_exercise_history"
                     class="ui-btn-right ui-btn ui-btn-inline ui-mini ui-corner-all">History</a>
             </div>
             <div data-role="content">
@@ -398,7 +399,7 @@
                 });
             </script>
             <div data-role="header">
-                <a href="index.html" data-rel="back"
+                <a href="#login" data-rel="back"
                     class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all">Back</a>
                 <h1>New user</h1>
                 <a href="#" id="signup-submit"
@@ -417,6 +418,42 @@
             </div>
         </div>
 
+        <div data-role="page" id="user_exercise_history">
+            <div data-role="header">
+                <a href="#user_home_page" data-rel="back"
+                    class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all">Back</a>
+                <h1>History</h1>
+            </div>
+            <div data-role="content">
+                <table data-role="table" data-mode="columntoggle" class="ui-responsive table-stroke">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th data-priority="1">Duration</th>
+                            <th data-priority="2">Energy</th>
+                            <th data-priority="3">Power generated</th>
+                            <th data-priority="4">CO<small>2</small> reduced</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>2014-11-23</td>
+                            <td>1h 21min</td>
+                            <td>12 kCal</td>
+                            <td>122 kJ</td>
+                            <td>3 kg</td>
+                        </tr>
+                        <tr>
+                            <td>2014-11-24</td>
+                            <td>2h 21min</td>
+                            <td>12 kCal</td>
+                            <td>122 kJ</td>
+                            <td>3.1 kg</td>
+                        </tr>
+                     </tbody>
+                </table>
+            </div>
+        </div>
     </body>
 
 </html>
