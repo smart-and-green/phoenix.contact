@@ -59,16 +59,27 @@
                                 window.localStorage.setItem("savedUserid", userid);
                                 window.localStorage.setItem("savedPassword", password);
 
-                                $("#userNameHead").text(result["name"]);
-                                $("#exercise_time").text(result["exercise_time"]);
-                                $("#Energy_consumption").text(result["Energy_consumption"]);
-                                $("#Electricity_generation").text(result["Electricity_generation"]);
+                                var userData = result.userdata;
+
+                                $("#userNameHead").text(userData.name);
+                                
+                                $("#duration-summary").text(userData.summary.duration);
+                                $("#energy-summary").text(userData.summary.energy);
+                                $("#co2-summary").text(userData.summary.energy * 10);   // 此处修改换算公式
+                                $("#energy-rank-summary").text(userData.summary.globalRank);
+
+                                $("#duration-average").text(userData.average.duration);
+                                $("#energy-average").text(userData.average.energy);
+                                $("#co2-average").text(userData.average.energy * 10);
+                                $("#energy-rank-average").text(userData.average.globalRank);
+
+                                $("#duration-lastweek").text(userData.lastWeekSummary.duration);
+                                $("#energy-lastweek").text(userData.lastWeekSummary.energy);
+                                $("#co2-lastweek").text(userData.lastWeekSummary.energy * 10);
+                                $("#energy-rank-lastweek").text(userData.lastWeekSummary.globalRank);
                             } else {
                                 $("#login-result").text("user name or password error.");
                             }
-                        },
-                        error: function(XMLHttpRequest, info, e){
-                            alert("error: " + XMLHttpRequest.readyState);
                         }
                     });
                 }
@@ -85,7 +96,7 @@
                 }
 
                 $(document).ready(function(){
-                    $("#loginSubmit").click(function(){
+                    $("#loginSubmit").click(function() {
                         var userid = $("#login-user-name").val();
                         var password = $("#login-password").val();
                         loginSubmit(userid, password);
@@ -107,7 +118,7 @@
                     <input id="login-password" name="login-password" type="password" data-clear-btn="true" 
                         placeholder="Password" />
                     <a id="loginSubmit" class="ui-btn ui-corner-all">Login</a>
-                    <a href="#sign_up_page" class="ui-btn ui-corner-all">Signup</a>
+                    <a href="#sign_up_page" class="ui-btn ui-corner-all">Sign up</a>
                 </form>
 
                 <p id="login-result" style="color:red;"></p>
@@ -128,6 +139,7 @@
                 
                 var IntvId;
                 var StartSecStamp = 0;
+                var EquipmentId = "";
 
                 function updateDurationDisp() {
                     var myDate = new Date();
@@ -153,6 +165,9 @@
                     var currentMillis = myDate.getTime();
                     StartSecStamp = currentMillis / 1000;
                     IntvId = window.setInterval(updateDurationDisp, 1000);
+
+                    // 从code中读出EquipmentId
+                    EquipmentId = "defaultEquipmentId";
                 }
                 function stopEx_qrcodeProc(code) {
                     alert(code);
@@ -160,7 +175,36 @@
                     // 如果qrcode读取成功，处理完信息后将按钮转变成停止功能
                     $("#start-exercise-btn").text("Start to exercise");
 
+                    // 停止计时
                     window.clearInterval(IntvId);
+
+                    // 将解码的code打包到exerciseData
+                    var exerciseData = {
+                        startTime: new Date(),
+                        endTime: new Date(),
+                        energy: 0.12,
+                        peakPower: 450.1,
+                        efficiency: 0.78,
+                        peakCurrent: 12.1,
+                        peakVoltage: 45.7
+                    };
+
+                    var userid = window.localStorage.getItem("savedUserid");
+                    uploadExRecord(userid, exerciseData, EquipmentId);
+
+                    // 上传完后把对应内容显示出来
+                    $("#startTime-thisEx").text(exerciseData.startTime);
+                    $("#endTime-thisEx").text(exerciseData.endTime);
+
+                    // 计算持续时间
+                    var durationInMin = (exerciseData.endTime.getTime() - exerciseData.startTime.getTime()) / 1000 / 60;
+                    $("#duration-hour-thisEx").text(parseInt(durationInMin / 60));
+                    $("#duration-min-thisEx").text(parseInt(durationInMin % 60));
+
+                    $("#energy-thisTime").text(exerciseData.energy);
+                    $("#peak-power-thisTime").text(exerciseData.peakPower);
+                    $("#efficiency-thisTime").text(exerciseData.efficiency);
+                    $("#co2-reduced-thisTime").text(exerciseData.energy * 10);  // 换算得到
                 }
 
                 function captureAndDecode(fnCallback) {
@@ -262,16 +306,19 @@
                     $("#user-ex-history-btn").click(function() {
 
                         // 需要通过session获取userid
-                        var userid = "default_userid";
+                        var userid = window.localStorage.getItem("savedUserid");
                         getUserLast10ExHistory(userid);
                     });
+
+                    // test
+                    $("#startTime-thisEx").text((new Date()). toLocaleTimeString());
                 });
 
             </script>
             <div data-role="header">
                 <a href="#login" id="signOutBtn"
                     class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all">Sign out</a>
-                <h1 id="userNameHead"></h1>
+                <h1 id="userNameHead">[name]</h1>
                 <a href="#" id="user-ex-history-btn"
                     class="ui-btn-right ui-btn ui-btn-inline ui-mini ui-corner-all">History</a>
             </div>
@@ -279,31 +326,34 @@
                 <table data-role="table" data-mode="columntoggle" class="ui-responsive table-stroke">
                     <thead>
                         <tr>
-                            <th>Item</th>
-                            <th data-priority="1">Value</th>
-                            <th data-priority="2">Global rank</th>
+                            <th>Achievement</th>
+                            <th data-priority="1">Duration</th>
+                            <th data-priority="1">Energy</th>
+                            <th data-priority="2">CO<small>2</small> reduced</th>
+                            <th data-priority="3">Rank</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>Total energy</td>
-                            <td><span id="Electricity_generation">100</span> kWh</td>
-                            <td>1</td>
+                            <td>Summary</td>
+                            <td><span id="duration-summary">10h 12min</span></td>
+                            <td><span id="energy-summary">100</span> kWh</td>
+                            <td><span id="co2-summary">1.2</span> kg</td>
+                            <td><span id="energy-rank-summary">1</span></td>
                         </tr>
                         <tr>
-                            <td>Fitness time</td>
-                            <td><span id="exercise_time">10h 12min</span></td>
-                            <td>1</td>
+                            <td>Average</td>
+                            <td><span id="duration-average">10h 12min</span></td>
+                            <td><span id="energy-average">100</span> kWh</td>
+                            <td><span id="co2-average">1.5</span> kg</td>
+                            <td><span id="energy-rank-average">1</span></td>
                         </tr>
                         <tr>
-                            <td>CO<small>2</small> reduced</td>
-                            <td><span id="co2_reduced"></span> kg</td>
-                            <td>1</td>
-                        </tr>
-                        <tr>
-                            <td>Energy Consumption</td>
-                            <td><span id="Energy_consumption"></span> kJ</td>
-                            <td>1</td>
+                            <td>Last week</td>
+                            <td><span id="duration-lastweek">10h 12min</span></td>
+                            <td><span id="energy-lastweek">100</span> kWh</td>
+                            <td><span id="co2-lastweek">1.5</span> kg</td>
+                            <td><span id="energy-rank-lastweek">1</span></td>
                         </tr>
                      </tbody>
                 </table>
@@ -327,32 +377,46 @@
 
                 <p class="developer-markdown">only displayed when finished exercising</p>
                 <div>
-                    <strong>This exercise</strong>
                     <table data-role="table" data-mode="column" class="ui-responsive table-stroke">
                         <thead>
                             <tr>
-                                <th>Item</th>
-                                <th data-priority="1">Value</th>
+                                <th>This exercise</th>
+                                <th data-priority="1">Achievement</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td>Total energy</td>
-                                <td><span id="Electricity_generation_thisTime">100</span> kWh</td>
+                                <td>Start time</td>
+                                <td><span id="startTime-thisEx">2014-11-11 15:30</span></td>
                             </tr>
                             <tr>
-                                <td>Fitness time</td>
-                                <td><span id="exercise_time_thisTime">10h 12min</span></td>
+                                <td>End time</td>
+                                <td><span id="endTime-thisEx">2014-11-11 15:32</span></td>
+                            </tr>
+                            <tr>
+                                <td>Duration</td>
+                                <td>
+                                    <span id="duration-hour-thisEx">0</span> <small>h</small>
+                                    <span id="duration-min-thisEx">2</span> <small>min</small>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Energy</td>
+                                <td><span id="energy-thisTime">100</span> kWh</td>
+                            </tr>
+                            <tr>
+                                <td>Peak Power</td>
+                                <td><span id="peak-power-thisTime">450</span> W</td>
+                            </tr>
+                            <tr>
+                                <td>Efficiency</td>
+                                <td><span id="efficiency-thisTime">78</span> %</td>
                             </tr>
                             <tr>
                                 <td>CO<small>2</small> reduced</td>
-                                <td><span id="co2_reduced_thisTime"></span> kg</td>
+                                <td><span id="co2-reduced-thisTime">1.1</span> kg</td>
                             </tr>
-                            <tr>
-                                <td>Energy Consumption</td>
-                                <td><span id="Energy_consumption_thisTime"></span> kJ</td>
-                            </tr>
-                         </tbody>
+                        </tbody>
                     </table>
                     <button id="share-this-exercise-btn">Share</button><br>
                 </div>
