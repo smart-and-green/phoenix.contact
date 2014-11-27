@@ -267,12 +267,13 @@
                                 var recordStr = "";
                                 for (record in result["exDataType"]) {
                                     recordStr += "\
-                                                <tr id='xxx'>\
-                                                    <td>2014-11-23</td>\
+                                                <tr id='user-record-" + result["lastIndex"] + "'>\
+                                                    <td>" + record.startTime.toLocaleDateString() + "</td>\
                                                     <td>1h 21min</td>\
-                                                    <td>12 kCal</td>\
-                                                    <td>122 kJ</td>\
-                                                    <td>3 kg</td>\
+                                                    <td>" + record.energy + " kWh</td>\
+                                                    <td>122 kg</td>\
+                                                    <td>" + record.peakPower + " W</td>\
+                                                    <td>" + record.efficiency + " %</td>\
                                                 </tr>";
                                 }
                                 $("#history-table-body").html(recordStr);
@@ -580,6 +581,18 @@
         </div>
 
         <div data-role="page" id="user_exercise_history">
+            <script type="text/javascript">
+                $(document).ready(function() {
+                    $("#history-table-body tr").bind({
+                        mouseover: function() {
+                            $(this).css("backgroundColor", "lightGray");
+                        },
+                        mouseout: function() {
+                            $(this).css("backgroundColor", "");
+                        }
+                    });
+                });
+            </script>
             <div data-role="header">
                 <a href="#user_home_page" data-rel="back"
                     class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all">Back</a>
@@ -591,28 +604,36 @@
                         <tr>
                             <th>Date</th>
                             <th data-priority="1">Duration</th>
-                            <th data-priority="2">Energy</th>
-                            <th data-priority="3">Power generated</th>
-                            <th data-priority="4">CO<small>2</small> reduced</th>
+                            <th data-priority="1">Energy</th>
+                            <th data-priority="2">CO<small>2</small> reduced</th>
+                            <th data-priority="3">Peak power</th>
+                            <th data-priority="4">Efficiency</th>
                         </tr>
                     </thead>
                     <tbody id="history-table-body">
                         <tr>
                             <td>2014-11-23</td>
                             <td>1h 21min</td>
-                            <td>12 kCal</td>
-                            <td>122 kJ</td>
-                            <td>3 kg</td>
+                            <td>1.2 kWh</td>
+                            <td>122 kg</td>
+                            <td>300 W</td>
+                            <td>56 %</td>
                         </tr>
                         <tr>
-                            <td>2014-11-24</td>
-                            <td>2h 21min</td>
-                            <td>12 kCal</td>
-                            <td>122 kJ</td>
-                            <td>3.1 kg</td>
+                            <td>2014-11-23</td>
+                            <td>1h 21min</td>
+                            <td>1.2 kWh</td>
+                            <td>122 kg</td>
+                            <td>300 W</td>
+                            <td>56 %</td>
                         </tr>
                      </tbody>
                 </table>
+                <p>
+                    <center style="color:gray;font-size:0.8em;">
+                        <span id="user-history-records-count">2</span> records
+                    </center>
+                </p>
             </div>
         </div>
 
