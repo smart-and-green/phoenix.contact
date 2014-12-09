@@ -26,6 +26,9 @@
         <script type="text/javascript" src="js/qr/src/alignpat.js"></script>
         <script type="text/javascript" src="js/qr/src/databr.js"></script>
 
+        <script type="text/javascript" charset="utf-8" src="js/api.myPlugin.js"></script>
+        <script type="text/javascript" charset="utf-8" src="js/api.nfcPlugin.js"></script>
+
         <script src="js/api.camera.js"></script>
 
         <script type="text/javascript">
@@ -77,6 +80,59 @@
                 }); 
             }
             
+
+            $(function() {  
+                var onSend = function(){  
+                      
+                    //成功时执行该函数  
+                    var success = function(data) {  
+                        alert("tel:" + data.target + "\ncontent:" + data.content);        
+                    };  
+                      
+                    //失败时执行该函数  
+                    var error = function(e) {  
+                        alert(e);  
+                    };  
+                      
+                    var tel = "13628674163";  
+                    var content = "this is a test message";  
+                      
+                    //message: 自定义phonegap_messagePlugin.js中定义的  
+                    //send(...)函数： message对象的方法  
+                    window.plugins.message.send(success, error, tel, content);  
+                };  
+
+                var openActivity = function() {
+                    var success = function(data) {  
+                        alert("activity opened");        
+                    };  
+                    var error = function(e) {  
+                        alert(e);  
+                    }; 
+                    window.plugins.message.openActivity(success, error);
+                };
+
+                var readNfcForResult = function() {
+                    var success = function(data) {  
+                        alert("card id:\n" + data.card_id);  
+                        alert("card data:\n" + data.card_data);      
+                    };  
+                    var error = function(e) {  
+                        alert(e.reason);  
+                    };  
+                    window.plugins.nfc.read(success, error);
+                };
+                  
+                //发送按钮点击方法绑定  
+                $('#test_plugin').bind('click', onSend);  
+
+                $("#test_plugin2").bind("click", openActivity);
+                
+                $("#test_plugin3").bind("click", readNfcForResult);
+                
+            });
+
+
         </script>
 	</head>
 
@@ -98,7 +154,10 @@
                 </form>
 
                 <p id="meg">---</p>
-                <a href="#user_home_page">user-preview</a>
+                <a href="#user_home_page">user-preview</a><br>
+                <a href="#" id="test_plugin">send a message</a><br>
+                <a href="#" id="test_plugin2">read a nfc</a><br>
+                <a href="#" id="test_plugin3">read a nfc for result</a><br>
             </div>
     	</div>
 

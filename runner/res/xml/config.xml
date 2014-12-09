@@ -103,7 +103,12 @@
     <feature name="InAppBrowser">
       <param name="android-package" value="org.apache.cordova.InAppBrowser"/>
     </feature>
+    <feature name="NfcPlugin">
+      <param name="android-package" value="phoenix.contact.mobile.NfcPlugin" />
+    </feature>
     <!-- Deprecated plugins element. Remove in 3.0 -->
     <plugins>
+        <plugin name="MessagePlugin" value="phoenix.contact.mobile.MessagePlugin" />  
+        <plugin name="NfcPlugin" value="phoenix.contact.mobile.NfcPlugin"/>
     </plugins>
 </widget>

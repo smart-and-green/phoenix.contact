@@ -1649,11 +1649,12 @@ containing a value of this type.
         public static final int action_mode_bar=0x7f0a0030;
         public static final int action_mode_bar_stub=0x7f0a002f;
         public static final int action_mode_close_button=0x7f0a0022;
-        public static final int action_settings=0x7f0a0041;
+        public static final int action_settings=0x7f0a0044;
         public static final int activity_chooser_view_content=0x7f0a0023;
         public static final int always=0x7f0a0014;
         public static final int beginning=0x7f0a001b;
         public static final int bottom=0x7f0a001e;
+        public static final int card_values=0x7f0a0042;
         public static final int checkbox=0x7f0a002b;
         public static final int collapseActionView=0x7f0a0015;
         public static final int decor_content_parent=0x7f0a0031;
@@ -1679,6 +1680,7 @@ containing a value of this type.
         public static final int progress_circular=0x7f0a0007;
         public static final int progress_horizontal=0x7f0a0008;
         public static final int radio=0x7f0a002d;
+        public static final int scrollView1=0x7f0a0041;
         public static final int search_badge=0x7f0a0037;
         public static final int search_bar=0x7f0a0036;
         public static final int search_button=0x7f0a0038;
@@ -1702,6 +1704,7 @@ containing a value of this type.
         public static final int useLogo=0x7f0a0013;
         public static final int withText=0x7f0a0018;
         public static final int wrap_content=0x7f0a0009;
+        public static final int write_button=0x7f0a0043;
     }
     public static final class integer {
         /**  The maximum number of action buttons that should be permitted within
@@ -1753,7 +1756,8 @@ containing a value of this type.
         public static final int abc_search_view=0x7f030015;
         public static final int abc_simple_dropdown_hint=0x7f030016;
         public static final int activity_main=0x7f030017;
-        public static final int support_simple_spinner_dropdown_item=0x7f030018;
+        public static final int activity_nfc_proc=0x7f030018;
+        public static final int support_simple_spinner_dropdown_item=0x7f030019;
     }
     public static final class menu {
         public static final int main=0x7f0d0000;
