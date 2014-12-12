@@ -1,56 +1,102 @@
-CREATE DATABASE  IF NOT EXISTS `phoenix` /*!40100 DEFAULT CHARACTER SET utf8 */;
-USE `phoenix`;
--- MySQL dump 10.13  Distrib 5.6.13, for Win32 (x86)
---
--- Host: localhost    Database: phoenix
--- ------------------------------------------------------
--- Server version	5.6.17
+/*
+Navicat MySQL Data Transfer
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+Source Server         : sun
+Source Server Version : 50617
+Source Host           : localhost:3306
+Source Database       : phoenix
 
---
--- Table structure for table `user_information`
---
+Target Server Type    : MYSQL
+Target Server Version : 50617
+File Encoding         : 65001
 
-DROP TABLE IF EXISTS `user_information`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `user_information` (
-  `user_id` varchar(255) DEFAULT NULL,
-  `password` varchar(255) DEFAULT NULL,
-  `name` varchar(255) DEFAULT NULL,
-  `exercise_time` time DEFAULT '00:00:00',
-  `Energy_consumption` varchar(255) DEFAULT '0',
-  `Electricity_generation` varchar(255) DEFAULT '0'
+Date: 2014-12-12 19:14:46
+*/
+
+SET FOREIGN_KEY_CHECKS=0;
+
+-- ----------------------------
+-- Table structure for equipment_information
+-- ----------------------------
+DROP TABLE IF EXISTS `equipment_information`;
+CREATE TABLE `equipment_information` (
+  `equ_id` varchar(255) NOT NULL,
+  `equ_type` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Dumping data for table `user_information`
---
+-- ----------------------------
+-- Records of equipment_information
+-- ----------------------------
 
-LOCK TABLES `user_information` WRITE;
-/*!40000 ALTER TABLE `user_information` DISABLE KEYS */;
-INSERT INTO `user_information` VALUES ('jim','123456','name_jim','00:12:53','1074J','379kw.h'),('lucy','123456','name_lucy','00:24:56','897J','265kw.h'),('jack','123456','name_jack','00:21:54','287J','198kw.h'),('michael','123456','name_michael','00:17:27','297J','398kw.h'),('sun','123456',NULL,'00:00:00','0','0'),('jun','123456','sunshine','00:00:00','0','0');
-/*!40000 ALTER TABLE `user_information` ENABLE KEYS */;
-UNLOCK TABLES;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+-- ----------------------------
+-- Table structure for exercise_information
+-- ----------------------------
+DROP TABLE IF EXISTS `exercise_information`;
+CREATE TABLE `exercise_information` (
+  `user_id` varchar(255) NOT NULL,
+  `equipment_id` varchar(255) DEFAULT NULL,
+  `start_time` datetime DEFAULT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `exercise_time` time DEFAULT NULL,
+  `calories` float DEFAULT NULL,
+  `power_generate` float DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+-- ----------------------------
+-- Records of exercise_information
+-- ----------------------------
+INSERT INTO `exercise_information` VALUES ('jim', null, null, null, null, null, null);
 
--- Dump completed on 2014-11-23 14:58:54
+-- ----------------------------
+-- Table structure for total_information
+-- ----------------------------
+DROP TABLE IF EXISTS `total_information`;
+CREATE TABLE `total_information` (
+  `user_id` varchar(255) DEFAULT NULL,
+  `duration-summary` int(6) DEFAULT NULL,
+  `energy-summary` float(11,0) DEFAULT NULL,
+  `energy-rank-summary` int(11) DEFAULT NULL,
+  `duration-average` int(6) DEFAULT NULL,
+  `energy-average` float(11,0) DEFAULT NULL,
+  `energy-rank-average` int(11) DEFAULT NULL,
+  `duration-lastweek` int(6) DEFAULT NULL,
+  `energy-lastweek` float(11,0) DEFAULT NULL,
+  `energy-rank-lastweek` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of total_information
+-- ----------------------------
+INSERT INTO `total_information` VALUES ('jim', '145', '23', '32', '224', '34', '54', '345', '23', '64');
+INSERT INTO `total_information` VALUES ('lucy', null, null, null, null, null, null, null, null, null);
+
+-- ----------------------------
+-- Table structure for user_information
+-- ----------------------------
+DROP TABLE IF EXISTS `user_information`;
+CREATE TABLE `user_information` (
+  `user_id` varchar(255) NOT NULL,
+  `nickname` varchar(255) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `hobby` varchar(255) DEFAULT NULL,
+  `favorite_sport` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of user_information
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for user_login
+-- ----------------------------
+DROP TABLE IF EXISTS `user_login`;
+CREATE TABLE `user_login` (
+  `user_id` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of user_login
+-- ----------------------------
+INSERT INTO `user_login` VALUES ('jim', '123456');
+INSERT INTO `user_login` VALUES ('lucy', '123456');
