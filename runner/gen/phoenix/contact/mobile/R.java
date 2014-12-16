@@ -1654,7 +1654,6 @@ containing a value of this type.
         public static final int always=0x7f0a0014;
         public static final int beginning=0x7f0a001b;
         public static final int bottom=0x7f0a001e;
-        public static final int card_values=0x7f0a0042;
         public static final int checkbox=0x7f0a002b;
         public static final int collapseActionView=0x7f0a0015;
         public static final int decor_content_parent=0x7f0a0031;
@@ -1677,6 +1676,7 @@ containing a value of this type.
         public static final int never=0x7f0a0017;
         public static final int none=0x7f0a000f;
         public static final int normal=0x7f0a000b;
+        public static final int proc_tips=0x7f0a0042;
         public static final int progress_circular=0x7f0a0007;
         public static final int progress_horizontal=0x7f0a0008;
         public static final int radio=0x7f0a002d;

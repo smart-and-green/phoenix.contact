@@ -112,24 +112,46 @@
                     window.plugins.message.openActivity(success, error);
                 };
 
+                var mifareDefaultKey = [0xff, 0xff, 0xff, 0xff, 0xff, 0xff];
                 var readNfcForResult = function() {
                     var success = function(data) {  
-                        alert("card id:\n" + data.card_id);  
-                        alert("card data:\n" + data.card_data);      
+                        alert("card id:\n" + data.cardId);  
+                        var sector1str = "";
+                        for (var i = 0; i < 16 * 4; ++i) {
+                            sector1str += data.cardData[i].toString(16);
+                        }
+                        alert("block 1:\n" + sector1str);     
                     };  
                     var error = function(e) {  
                         alert(e.reason);  
                     };  
-                    window.plugins.nfc.read(success, error);
+                    window.plugins.nfc.read(success, error, mifareDefaultKey);
+                };
+
+                var writeNfcTag = function() {
+                    var success = function(data) {  
+                        alert("write successfully!");      
+                    };  
+                    var error = function(e) {  
+                        alert(e.reason);  
+                    };  
+                    window.plugins.nfc.write(success, error, mifareDefaultKey, 
+                        [{
+                            blockIndex: 1,
+                            data: [0xca, 0xfe, 0xba, 0xbe, 0x0, 0x0, 0x0, 0x0]
+                        },
+                        {
+                            blockIndex: 2,
+                            data: [0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1]
+                        }]
+                    );
                 };
                   
                 //发送按钮点击方法绑定  
-                $('#test_plugin').bind('click', onSend);  
-
+                $('#test_plugin').bind('click', onSend);
                 $("#test_plugin2").bind("click", openActivity);
-                
                 $("#test_plugin3").bind("click", readNfcForResult);
-                
+                $("#test_plugin4").bind("click", writeNfcTag);
             });
 
 
@@ -158,6 +180,7 @@
                 <a href="#" id="test_plugin">send a message</a><br>
                 <a href="#" id="test_plugin2">read a nfc</a><br>
                 <a href="#" id="test_plugin3">read a nfc for result</a><br>
+                <a href="#" id="test_plugin4">write a tag with nfc</a><br>
             </div>
     	</div>
 

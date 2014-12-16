@@ -352,7 +352,6 @@ int id activity_chooser_view_content 0x7f0a0023
 int id always 0x7f0a0014
 int id beginning 0x7f0a001b
 int id bottom 0x7f0a001e
-int id card_values 0x7f0a0042
 int id checkbox 0x7f0a002b
 int id collapseActionView 0x7f0a0015
 int id decor_content_parent 0x7f0a0031
@@ -375,6 +374,7 @@ int id middle 0x7f0a001d
 int id never 0x7f0a0017
 int id none 0x7f0a000f
 int id normal 0x7f0a000b
+int id proc_tips 0x7f0a0042
 int id progress_circular 0x7f0a0007
 int id progress_horizontal 0x7f0a0008
 int id radio 0x7f0a002d
