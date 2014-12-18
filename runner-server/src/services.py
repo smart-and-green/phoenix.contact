@@ -251,7 +251,8 @@ def getUserLast10History(db):
         shijian3 = k[4].__str__()
         s["duration"] = shijian3
         s["energy"] = k[5]
-        print "字符串时间:",shijian1,shijian2,shijian3
+        s["peakPower"] = 45
+        s["efficiency"] = 85.7
         ret["histories"].append(s)
     print "数组里面的内容:",ret["histories"]
     return ret
@@ -263,15 +264,14 @@ def checkuserid(db):
     ret = {}
     ret["exist"] = False
     cr=db.cursor()#新建游标
-    cr.execute('''select user_id FROM user_information ''')
+    cr.execute('''select user_id FROM user_login ''')
     user_ids = cr.fetchall()
     print "check if this user_id be used" 
     print user_ids 
     for k in user_ids: 
         if k[0]==userid:
             ret["exist"] = True
-            print "this user_id is be used"
-        
+            print "this user_id is be used"        
     return ret
 
 @app.route('/signup', method = 'POST')
