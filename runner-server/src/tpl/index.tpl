@@ -91,7 +91,7 @@
 
                 function autoLogin() {
                     var userid = window.localStorage.getItem("savedUserid");
-                    if (userid != null || userid != "") {
+                    if (userid != null && userid != "") {
                         var password = window.localStorage.getItem("savedPassword");
                         
                         // 提示一下当前登陆的帐号
@@ -295,6 +295,7 @@
                 $(document).ready(function() {
                     $("#signOutBtn").click(signOut);
                     $("#start-exercise-btn").click(function() {
+                        alert($(this).val());
                         if ($(this).val().indexOf("Start") > 0) {
                             captureAndDecode(startEx_qrcodeProc);
                         } else if ($(this).val().indexOf("Stop") > 0) {
@@ -317,7 +318,7 @@
                     });
 
                     // test
-                    $("#startTime-thisEx").text((new Date()). toLocaleTimeString());
+                    $("#startTime-thisEx").text((new Date()).toLocaleTimeString());
                 });
 
             </script>
