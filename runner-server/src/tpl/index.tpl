@@ -295,9 +295,9 @@
                 $(document).ready(function() {
                     $("#signOutBtn").click(signOut);
                     $("#start-exercise-btn").click(function() {
-                        if ($(this).val() == "Start to exercise") {
+                        if ($(this).val().indexOf("Start") > 0) {
                             captureAndDecode(startEx_qrcodeProc);
-                        } else if ($(this).val() == "Stop exercising") {
+                        } else if ($(this).val().indexOf("Stop") > 0) {
                             captureAndDecode(stopEx_qrcodeProc);
                         }
 
