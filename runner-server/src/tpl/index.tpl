@@ -29,6 +29,8 @@
         <script type="text/javascript" src="js/qr/src/databr.js"></script>
 
         <script type="text/javascript" src="js/api.camera.js"></script>
+        <script type="text/javascript" charset="utf-8" src="js/api.myPlugin.js"></script>
+        <script type="text/javascript" charset="utf-8" src="js/api.nfcPlugin.js"></script>
 
 	</head>
 
@@ -216,17 +218,33 @@
                 }
 
                 function captureAndDecode(fnCallback) {
-                    navigator.camera.getPicture(function(image) {
-                        qrcode.callback = fnCallback; 
-                        qrcode.decode("data:image/jpeg;base64," + image);
-                    }, function(e) {
-                        console.log("camera error because: " + e);
-                    }, { 
-                        quality: 25,
-                        destinationType: destinationType.DATA_URL,
-                        targetWidth: 640,
-                        targetHeight: 480
-                    }); 
+                    // navigator.camera.getPicture(function(image) {
+                    //     qrcode.callback = fnCallback; 
+                    //     qrcode.decode("data:image/jpeg;base64," + image);
+                    // }, function(e) {
+                    //     console.log("camera error because: " + e);
+                    // }, { 
+                    //     quality: 25,
+                    //     destinationType: destinationType.DATA_URL,
+                    //     targetWidth: 640,
+                    //     targetHeight: 480
+                    // }); 
+                    var mifareDefaultKey = [0xff, 0xff, 0xff, 0xff, 0xff, 0xff];
+                    var readNfcForResult = function() {
+                        var success = function(data) {  
+                            alert("card id:\n" + data.cardId);  
+                            var sector1str = "";
+                            for (var i = 0; i < 16 * 4; ++i) {
+                                sector1str += data.cardData[i].toString(16);
+                            }
+                            alert("block 1:\n" + sector1str);     
+                        };  
+                        var error = function(e) {  
+                            alert(e.reason);  
+                        };  
+                        window.plugins.nfc.read(success, error, mifareDefaultKey);
+                    };
+                    readNfcForResult();
                 }
 
                 function signOut() {
@@ -298,7 +316,7 @@
                             } else {
                                 alert("you don't have any exercise records.");
                             }
-                        }
+                        }9
                     });
                 }
 
