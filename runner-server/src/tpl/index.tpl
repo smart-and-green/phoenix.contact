@@ -73,10 +73,15 @@
                                 $("#co2-average").text(userData.average.energy * 10);
                                 $("#energy-rank-average").text(userData.average.globalRank);
 
-                                $("#duration-lastweek").text(userData.lastWeekSummary.duration);
-                                $("#energy-lastweek").text(userData.lastWeekSummary.energy);
-                                $("#co2-lastweek").text(userData.lastWeekSummary.energy * 10);
-                                $("#energy-rank-lastweek").text(userData.lastWeekSummary.globalRank);
+                                $("#duration-lastMonth").text(userData.lastMonthSummary.duration);
+                                $("#energy-lastMonth").text(userData.lastMonthSummary.energy);
+                                $("#co2-lastMonth").text(userData.lastMonthSummary.energy * 10);
+                                $("#energy-rank-lastMonth").text(userData.lastMonthSummary.globalRank);
+
+                                $("#duration-thisMonth").text(userData.thisMonthSummary.duration);
+                                $("#energy-thisMonth").text(userData.thisMonthSummary.energy);
+                                $("#co2-thisMonth").text(userData.thisMonthSummary.energy * 10);
+                                $("#energy-rank-thisMonth").text(userData.thisMonthSummary.globalRank);
                             } else {
                                 $("#login-result").text("user name or password error.");
                             }
@@ -350,11 +355,18 @@
                             <td><span id="energy-rank-average">1</span></td>
                         </tr>
                         <tr>
-                            <td>Last week</td>
-                            <td><span id="duration-lastweek">10h 12min</span></td>
-                            <td><span id="energy-lastweek">100</span> kWh</td>
-                            <td><span id="co2-lastweek">1.5</span> kg</td>
-                            <td><span id="energy-rank-lastweek">1</span></td>
+                            <td>Last Month</td>
+                            <td><span id="duration-lastMonth">10h 12min</span></td>
+                            <td><span id="energy-lastMonth">100</span> kWh</td>
+                            <td><span id="co2-lastMonth">1.5</span> kg</td>
+                            <td><span id="energy-rank-lastMonth">1</span></td>
+                        </tr>
+                        <tr>
+                            <td>This Month</td>
+                            <td><span id="duration-thisMonth">10h 12min</span></td>
+                            <td><span id="energy-thisMonth">100</span> kWh</td>
+                            <td><span id="co2-thisMonth">1.5</span> kg</td>
+                            <td><span id="energy-rank-thisMonth">1</span></td>
                         </tr>
                      </tbody>
                 </table>
