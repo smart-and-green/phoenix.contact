@@ -162,6 +162,7 @@
                 // 同时维护按钮内容的显示
                 function startEx_qrcodeProc(code) {
                     console.log(code);
+                    alert(code);
 
                     // 如果qrcode读取成功，处理完信息后将按钮转变成停止功能
                     $("#start-exercise-btn").text("Stop exercising");
@@ -176,6 +177,7 @@
                 }
                 function stopEx_qrcodeProc(code) {
                     console.log(code);
+                    alert(code);
 
                     // 如果qrcode读取成功，处理完信息后将按钮转变成停止功能
                     $("#start-exercise-btn").text("Start to exercise");
@@ -191,7 +193,8 @@
                         peakPower: 450.1,
                         efficiency: 0.78,
                         peakCurrent: 12.1,
-                        peakVoltage: 45.7
+                        peakVoltage: 45.7,
+                        equipmentid: "bike001"
                     };
 
                     var userid = window.localStorage.getItem("savedUserid");
@@ -303,10 +306,10 @@
                 $(document).ready(function() {
                     $("#signOutBtn").click(signOut);
                     $("#start-exercise-btn").click(function() {
-                        alert($(this).val());
-                        if ($(this).val().indexOf("Start") > 0) {
+                        alert($(this).text());
+                        if ($(this).text().indexOf("Start") > 0) {
                             captureAndDecode(startEx_qrcodeProc);
-                        } else if ($(this).val().indexOf("Stop") > 0) {
+                        } else if ($(this).text().indexOf("Stop") > 0) {
                             captureAndDecode(stopEx_qrcodeProc);
                         }
 
