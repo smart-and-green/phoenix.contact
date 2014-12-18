@@ -239,20 +239,21 @@ def getUserLast10History(db):
     cr.close()
     ret = {}
     ret["lastIndex"] = number
-    ret["exDataType"] = []
+    ret["histories"] = []
     for k in Last10History:
-        s = []
-      #  s[0] = k[0]
-      #  s[1] = k[1]
-      #  shijian1 = k[2].__str__()
-      #  s[2] = shijian1
-      #  shijian2 = k[3].__str__()
-      #  s[3] = shijian2
-      #  shiian3 = k[4].__str__()
-      #  s[4] = shijian3
-      #  print "字符串时间:",shijian1,shijian2,shijian3
-      #  ret["exDataType"].append(s)
-    print "数组里面的内容:",ret["exDataType"]
+        s = {}
+        s["startTime"] = k[0]
+        s[1] = k[1]
+        shijian1 = k[2].__str__()
+        s["startTime"] = shijian1
+        shijian2 = k[3].__str__()
+        s["endTime"] = shijian2
+        shijian3 = k[4].__str__()
+        s["duration"] = shijian3
+        s["energy"] = k[5]
+        print "字符串时间:",shijian1,shijian2,shijian3
+        ret["histories"].append(s)
+    print "数组里面的内容:",ret["histories"]
     return ret
         
     
