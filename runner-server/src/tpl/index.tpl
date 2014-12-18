@@ -198,7 +198,7 @@
                     };
 
                     var userid = window.localStorage.getItem("savedUserid");
-                    uploadExRecord(userid, exerciseData, EquipmentId);
+                    uploadExRecord(userid, exerciseData);
 
                     // 上传完后把对应内容显示出来
                     $("#startTime-thisEx").text(exerciseData.startTime);
@@ -236,14 +236,13 @@
                 }
 
 
-                function uploadExRecord(userid, exerciseData, equipmentid) {
+                function uploadExRecord(userid, exerciseData) {
                     $.ajax({
                         url: "uploadExRecord",
                         type: "post",
                         data: {
                             userid: userid,
-                            exData: exerciseData,
-                            equipmentid: equipmentid
+                            exData: exerciseData
                         },
                         datatype: "json",
                         async: true,
@@ -291,7 +290,8 @@
                                                     <td>" + result.histories[i].efficiency + " %</td>\
                                                 </tr>";
                                     recordIndex--;
-                                }                    
+                                }
+                                $("#history-table-body").html("");
                                 $("#history-table-body").html(recordStr);
                                
                                 window.location.href = "#user_exercise_history";
@@ -307,9 +307,9 @@
                     $("#signOutBtn").click(signOut);
                     $("#start-exercise-btn").click(function() {
                         alert($(this).text());
-                        if ($(this).text().indexOf("Start") > 0) {
+                        if ($(this).text().indexOf("Start") >= 0) {
                             captureAndDecode(startEx_qrcodeProc);
-                        } else if ($(this).text().indexOf("Stop") > 0) {
+                        } else if ($(this).text().indexOf("Stop") >= 0) {
                             captureAndDecode(stopEx_qrcodeProc);
                         }
 
