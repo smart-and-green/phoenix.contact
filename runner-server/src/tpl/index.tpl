@@ -272,7 +272,7 @@
                                 var recordStr = "";
                                 for (record in result.histories) {
                                     recordStr += "\
-                                                <tr id='user-record-" + result.lsatIndex + "'>\
+                                                <tr id='user-record-" + result.lastIndex + "'>\
                                                     <td>" + record.startTime + "</td>\
                                                     <td>1h 21min</td>\
                                                     <td>" + record.energy + " kWh</td>\
