@@ -1,5 +1,6 @@
 # -*- coding: utf8 -*-
-import bottle
+import bottle,time,datetime,json
+from datetime import  datetime
 from bottle import run, request, response, post, get, template, route, static_file,\
   Bottle, HTTPResponse, HTTPError,debug,SimpleTemplate,os
 from json import JSONDecoder
@@ -8,6 +9,14 @@ from bottle_MySQLPlugin import MySQLPlugin
 import MySQLdb
   
 app = bottle.default_app()
+
+#==================================================================#
+#class DateEncoder(json.JSONEncoder):                              #
+#     def default(self,obj):                                       #
+#         if isinstance(obj,datetime):                             #
+#             return obj.__str__()                                 #
+#         return json.JSONEncoder.default(self,obj)                #
+#==================================================================#
 
 #---------------------------------------------
 @app.route('/js/<path>')
@@ -56,20 +65,19 @@ def login(db):
                     print total_information
                     for k in total_information:                                                                    
                         ret["userdata"] = {}
-                        ret["userdata"]["summary"] = {}
-                        ret["userdata"]["summary"]["duration"] = k[1]
+                        ret["userdata"]["summary"] = {}                        
+                        summary_duration = k[1].__str__()
+                        print "转换成字符串的summary时间:",summary_duration  #json格式不能直接传time格式
+                        ret["userdata"]["summary"]["duration"] = summary_duration
                         ret["userdata"]["summary"]["energy"] = k[2]
                         ret["userdata"]["summary"]["globalRank"] = k[3]
                         
                         ret["userdata"]["average"] = {}
-                        ret["userdata"]["average"]["duration"] = k[4]
+                        average_duration = k[4].__str__()
+                        print "转换成字符串的average时间:",average_duration
+                        ret["userdata"]["average"]["duration"] = average_duration
                         ret["userdata"]["average"]["energy"] = k[5]
-                        ret["userdata"]["average"]["globalRank"] = k[6]
-                        
-#                        ret["userdata"]["lastWeekSummary"] = {}
-#                        ret["userdata"]["lastWeekSummary"]["duration"] = k[7]
-#                        ret["userdata"]["lastWeekSummary"]["energy"] = k[8]
-#                        ret["userdata"]["lastWeekSummary"]["globalRank"] = k[9]
+                        ret["userdata"]["average"]["globalRank"] = k[6]                        
                         
                     cr.execute('''SELECT COUNT(*) FROM total_information WHERE energy_summary>(SELECT energy_summary FROM total_information WHERE 
                                 user_id=%(phoenix.user_id)s)''',{"phoenix.user_id":userid})
@@ -225,18 +233,20 @@ def signup(db):
     username = request.POST.get('userName')
     ret = {}
     ret["success"] = True
+    ret["reason"] = 0
     cr=db.cursor()#新建游标
-    cr.execute('''select user_id FROM user_information ''')
+    cr.execute('''select user_id FROM user_login ''')
     user_ids = cr.fetchall()
     for k in user_ids:
         if k[0] == userid:
             ret["success"] = False
+            ret["reason"] = 1
             print "this user_id exit,can not signup"
-            return ret
-   
-    cr.execute("INSERT INTO user_information (user_id,password,name) VALUES (%s,%s,%s)",(userid,password,username))
-    cnx.commit()  
-    cr.close()
+    
+    if (ret["success"] == True):                       
+        cr.execute("INSERT INTO user_login (user_id,password) VALUES (%s,%s)",(userid,password))  
+        cr.close()
+        print "注册成功"
     return ret  
 
 @app.route('/uploadExRecord', method = 'POST')
