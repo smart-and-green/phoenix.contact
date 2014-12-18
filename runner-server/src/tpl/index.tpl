@@ -270,16 +270,20 @@
                                 alert("you have " + result.lastIndex + " exercise records");
 
                                 var recordStr = "";
-                                for (record in result.histories) {
+                                var recordIndex = result.lastIndex;
+
+                                // for..in statement in javascript are not the same like java
+                                for (i in result.histories) {
                                     recordStr += "\
-                                                <tr id='user-record-" + result.lastIndex + "'>\
-                                                    <td>" + record.startTime + "</td>\
+                                                <tr id='user-record-" + recordIndex + "'>\
+                                                    <td>" + result.histories[i].startTime + "</td>\
                                                     <td>1h 21min</td>\
-                                                    <td>" + record.energy + " kWh</td>\
+                                                    <td>" + result.histories[i].energy + " kWh</td>\
                                                     <td>122 kg</td>\
-                                                    <td>" + record.peakPower + " W</td>\
-                                                    <td>" + record.efficiency + " %</td>\
+                                                    <td>" + result.histories[i].peakPower + " W</td>\
+                                                    <td>" + result.histories[i].efficiency + " %</td>\
                                                 </tr>";
+                                    recordIndex--;
                                 }
                                 alert(recordStr);
                                 $("#history-table-body").html(recordStr);
