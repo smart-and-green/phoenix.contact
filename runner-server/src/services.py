@@ -244,9 +244,13 @@ def signup(db):
             print "this user_id exit,can not signup"
     
     if (ret["success"] == True):                       
-        cr.execute("INSERT INTO user_login (user_id,password) VALUES (%s,%s)",(userid,password))  
-        cr.close()
+        cr.execute("INSERT INTO user_login (user_id,password) VALUES (%s,%s)",(userid,password)) 
+        if (username == ""):             
+            cr.execute("INSERT INTO user_information (user_id,nickname) VALUES (%s,%s)",(userid,userid))
+        else:
+            cr.execute("INSERT INTO user_information (user_id,nickname) VALUES (%s,%s)",(userid,username))
         print "注册成功"
+    cr.close()
     return ret  
 
 @app.route('/uploadExRecord', method = 'POST')
