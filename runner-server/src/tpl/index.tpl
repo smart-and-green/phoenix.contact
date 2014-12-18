@@ -61,27 +61,27 @@
 
                                 var userData = result.userdata;
 
-                                // $("#userNameHead").text(userData.name);
+                                $("#userNameHead").text(userData.name);
                                 
-                                // $("#duration-summary").text(userData.summary.duration);
-                                // $("#energy-summary").text(userData.summary.energy);
-                                // $("#co2-summary").text(userData.summary.energy * 10);   // 此处修改换算公式
-                                // $("#energy-rank-summary").text(userData.summary.globalRank);
+                                $("#duration-summary").text(userData.summary.duration);
+                                $("#energy-summary").text(userData.summary.energy);
+                                $("#co2-summary").text(userData.summary.energy * 10);   // 此处修改换算公式
+                                $("#energy-rank-summary").text(userData.summary.globalRank);
 
-                                // $("#duration-average").text(userData.average.duration);
-                                // $("#energy-average").text(userData.average.energy);
-                                // $("#co2-average").text(userData.average.energy * 10);
-                                // $("#energy-rank-average").text(userData.average.globalRank);
+                                $("#duration-average").text(userData.average.duration);
+                                $("#energy-average").text(userData.average.energy);
+                                $("#co2-average").text(userData.average.energy * 10);
+                                $("#energy-rank-average").text(userData.average.globalRank);
 
-                                // $("#duration-lastMonth").text(userData.lastMonthSummary.duration);
-                                // $("#energy-lastMonth").text(userData.lastMonthSummary.energy);
-                                // $("#co2-lastMonth").text(userData.lastMonthSummary.energy * 10);
-                                // $("#energy-rank-lastMonth").text(userData.lastMonthSummary.globalRank);
+                                $("#duration-lastMonth").text(userData.lastMonthSummary.duration);
+                                $("#energy-lastMonth").text(userData.lastMonthSummary.energy);
+                                $("#co2-lastMonth").text(userData.lastMonthSummary.energy * 10);
+                                $("#energy-rank-lastMonth").text(userData.lastMonthSummary.globalRank);
 
-                                // $("#duration-thisMonth").text(userData.thisMonthSummary.duration);
-                                // $("#energy-thisMonth").text(userData.thisMonthSummary.energy);
-                                // $("#co2-thisMonth").text(userData.thisMonthSummary.energy * 10);
-                                // $("#energy-rank-thisMonth").text(userData.thisMonthSummary.globalRank);
+                                $("#duration-thisMonth").text(userData.thisMonthSummary.duration);
+                                $("#energy-thisMonth").text(userData.thisMonthSummary.energy);
+                                $("#co2-thisMonth").text(userData.thisMonthSummary.energy * 10);
+                                $("#energy-rank-thisMonth").text(userData.thisMonthSummary.globalRank);
                             } else {
                                 $("#login-result").text("user name or password error.");
                             }
@@ -303,6 +303,7 @@
                 $(document).ready(function() {
                     $("#signOutBtn").click(signOut);
                     $("#start-exercise-btn").click(function() {
+                        alert($(this).val());
                         if ($(this).val().indexOf("Start") > 0) {
                             captureAndDecode(startEx_qrcodeProc);
                         } else if ($(this).val().indexOf("Stop") > 0) {
