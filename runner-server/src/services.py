@@ -56,38 +56,45 @@ def login(db):
             information = cr.fetchall()
             print information
             for k in information:                
-                if k[1]==password:                     
+                if k[1]==password:
+                    cr.execute('''select * FROM user_information where user_information.user_id=%(phoenix.user_id)s''',{"phoenix.user_id":userid})                     
+                    nickname = cr.fetchall()
+                    nickname = nickname[0][1]
+                    print nickname
                     ret["success"] = True
                     ret["user_id"] = userid
                     ret["password"] = password
                     cr.execute('''select * FROM total_information where total_information.user_id=%(phoenix.user_id)s''',{"phoenix.user_id":userid})
                     total_information = cr.fetchall()
-                    print total_information
+                    print "总信息:",total_information
                     for k in total_information:                                                                    
                         ret["userdata"] = {}
+                        ret["userdata"]["name"] = nickname
                         ret["userdata"]["summary"] = {}                        
                         summary_duration = k[1].__str__()
                         print "转换成字符串的summary时间:",summary_duration  #json格式不能直接传time格式
                         ret["userdata"]["summary"]["duration"] = summary_duration
                         ret["userdata"]["summary"]["energy"] = k[2]
-                        ret["userdata"]["summary"]["globalRank"] = k[3]
+                   #     ret["userdata"]["summary"]["globalRank"] = k[3]
                         
                         ret["userdata"]["average"] = {}
                         average_duration = k[4].__str__()
                         print "转换成字符串的average时间:",average_duration
                         ret["userdata"]["average"]["duration"] = average_duration
                         ret["userdata"]["average"]["energy"] = k[5]
-                        ret["userdata"]["average"]["globalRank"] = k[6]                        
+                   #     ret["userdata"]["average"]["globalRank"] = k[6]                        
                         
                     cr.execute('''SELECT COUNT(*) FROM total_information WHERE energy_summary>(SELECT energy_summary FROM total_information WHERE 
                                 user_id=%(phoenix.user_id)s)''',{"phoenix.user_id":userid})
                     summary_rank=cr.fetchall()
                     summary_rank = summary_rank[0][0] + 1
+                    ret["userdata"]["summary"]["globalRank"] = summary_rank
                         
                     cr.execute('''SELECT COUNT(*) FROM total_information WHERE energy_average>(SELECT energy_average FROM total_information WHERE 
                                   user_id=%(phoenix.user_id)s)''',{"phoenix.user_id":userid})
                     average_rank=cr.fetchall()
                     average_rank = average_rank[0][0] + 1
+                    ret["userdata"]["average"]["globalRank"] = average_rank
                         
                     now_time = "2015-11-15 10:12:56"
                     cr.execute('''SELECT YEAR(%(now_time)s)''',{"now_time":now_time})
@@ -104,6 +111,10 @@ def login(db):
                     week = cr.fetchall()
                     week = week[0][0]#得到这是今年第几个星期
                     print "第几个星期:",week
+                    
+                    
+                    
+    
                     
 #---------------------------本月目前的排名---------------------------------------------------------------------------
                     cr.execute('''SELECT month_energy FROM month_information WHERE(user_id=%(user_id)s AND year=%(year)s AND month=%(month)s)''',
@@ -209,6 +220,42 @@ def login(db):
     cr.close()
     return ret
 
+@app.route('/getUserLast10History', method = 'POST')
+def getUserLast10History(db):
+    userid = request.POST.get('userid')
+    cr=db.cursor()#新建游标
+    cr.execute('''SELECT COUNT(*) FROM exercise_information WHERE (user_id=%(user_id)s)''',{"user_id":userid})
+    number = cr.fetchall()
+    number = number[0][0]
+    if (number >=10): 
+        print "该用户一共的锻炼记录超过10次:",number
+        cr.execute('''SELECT * FROM exercise_information WHERE (user_id=%(user_id)s AND num>(%(number)s-10)''',{"user_id":userid,"number":number})
+        Last10History = cr.fetchall()
+        print "用户最后10条锻炼记录:",Last10History
+    else:
+        cr.execute('''SELECT * FROM exercise_information WHERE (user_id=%(user_id)s)''',{"user_id":userid})
+        Last10History = cr.fetchall()
+        print "用户最后10条锻炼记录,不足10条:",number,Last10History
+    cr.close()
+    ret = {}
+    ret["lastIndex"] = number
+    ret["exDataType"] = []
+    for k in Last10History:
+        s = []
+      #  s[0] = k[0]
+      #  s[1] = k[1]
+      #  shijian1 = k[2].__str__()
+      #  s[2] = shijian1
+      #  shijian2 = k[3].__str__()
+      #  s[3] = shijian2
+      #  shiian3 = k[4].__str__()
+      #  s[4] = shijian3
+      #  print "字符串时间:",shijian1,shijian2,shijian3
+      #  ret["exDataType"].append(s)
+    print "数组里面的内容:",ret["exDataType"]
+    return ret
+        
+    
 @app.route('/checkUserid', method = 'POST')
 def checkuserid(db):
     userid = request.POST.get('userid')
