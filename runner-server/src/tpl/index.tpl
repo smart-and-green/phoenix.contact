@@ -61,27 +61,27 @@
 
                                 var userData = result.userdata;
 
-                                $("#userNameHead").text(userData.name);
+                                // $("#userNameHead").text(userData.name);
                                 
-                                $("#duration-summary").text(userData.summary.duration);
-                                $("#energy-summary").text(userData.summary.energy);
-                                $("#co2-summary").text(userData.summary.energy * 10);   // 此处修改换算公式
-                                $("#energy-rank-summary").text(userData.summary.globalRank);
+                                // $("#duration-summary").text(userData.summary.duration);
+                                // $("#energy-summary").text(userData.summary.energy);
+                                // $("#co2-summary").text(userData.summary.energy * 10);   // 此处修改换算公式
+                                // $("#energy-rank-summary").text(userData.summary.globalRank);
 
-                                $("#duration-average").text(userData.average.duration);
-                                $("#energy-average").text(userData.average.energy);
-                                $("#co2-average").text(userData.average.energy * 10);
-                                $("#energy-rank-average").text(userData.average.globalRank);
+                                // $("#duration-average").text(userData.average.duration);
+                                // $("#energy-average").text(userData.average.energy);
+                                // $("#co2-average").text(userData.average.energy * 10);
+                                // $("#energy-rank-average").text(userData.average.globalRank);
 
-                                $("#duration-lastMonth").text(userData.lastMonthSummary.duration);
-                                $("#energy-lastMonth").text(userData.lastMonthSummary.energy);
-                                $("#co2-lastMonth").text(userData.lastMonthSummary.energy * 10);
-                                $("#energy-rank-lastMonth").text(userData.lastMonthSummary.globalRank);
+                                // $("#duration-lastMonth").text(userData.lastMonthSummary.duration);
+                                // $("#energy-lastMonth").text(userData.lastMonthSummary.energy);
+                                // $("#co2-lastMonth").text(userData.lastMonthSummary.energy * 10);
+                                // $("#energy-rank-lastMonth").text(userData.lastMonthSummary.globalRank);
 
-                                $("#duration-thisMonth").text(userData.thisMonthSummary.duration);
-                                $("#energy-thisMonth").text(userData.thisMonthSummary.energy);
-                                $("#co2-thisMonth").text(userData.thisMonthSummary.energy * 10);
-                                $("#energy-rank-thisMonth").text(userData.thisMonthSummary.globalRank);
+                                // $("#duration-thisMonth").text(userData.thisMonthSummary.duration);
+                                // $("#energy-thisMonth").text(userData.thisMonthSummary.energy);
+                                // $("#co2-thisMonth").text(userData.thisMonthSummary.energy * 10);
+                                // $("#energy-rank-thisMonth").text(userData.thisMonthSummary.globalRank);
                             } else {
                                 $("#login-result").text("user name or password error.");
                             }
@@ -266,14 +266,14 @@
                         datatype: "json",
                         async: true,
                         success: function(result) {
-                            if (result["lastIndex"] != 0) {
-                                alert("you have " + result["lastIndex"] + " exercise records");
+                            if (result.lastIndex != 0) {
+                                alert("you have " + result.lastIndex + " exercise records");
 
                                 var recordStr = "";
-                                for (record in result["exDataType"]) {
+                                for (record in result.histories) {
                                     recordStr += "\
-                                                <tr id='user-record-" + result["lastIndex"] + "'>\
-                                                    <td>" + record.startTime.toLocaleDateString() + "</td>\
+                                                <tr id='user-record-" + result.lsatIndex + "'>\
+                                                    <td>" + record.startTime + "</td>\
                                                     <td>1h 21min</td>\
                                                     <td>" + record.energy + " kWh</td>\
                                                     <td>122 kg</td>\
@@ -281,6 +281,7 @@
                                                     <td>" + record.efficiency + " %</td>\
                                                 </tr>";
                                 }
+                                alert(recordStr);
                                 $("#history-table-body").html(recordStr);
                                
                                 window.location.href = "#user_exercise_history";
