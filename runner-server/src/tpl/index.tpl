@@ -161,7 +161,7 @@
                 // 记录运动设备信息和运动量信息，并显示
                 // 同时维护按钮内容的显示
                 function startEx_qrcodeProc(code) {
-                    alert(code);
+                    console.log(code);
 
                     // 如果qrcode读取成功，处理完信息后将按钮转变成停止功能
                     $("#start-exercise-btn").text("Stop exercising");
@@ -175,7 +175,7 @@
                     EquipmentId = "defaultEquipmentId";
                 }
                 function stopEx_qrcodeProc(code) {
-                    alert(code);
+                    console.log(code);
 
                     // 如果qrcode读取成功，处理完信息后将按钮转变成停止功能
                     $("#start-exercise-btn").text("Start to exercise");
@@ -217,8 +217,7 @@
                         qrcode.callback = fnCallback; 
                         qrcode.decode("data:image/jpeg;base64," + image);
                     }, function(e) {
-                        console.log("camera error: " + e);
-                        alert("camera error because: " + e);
+                        console.log("camera error because: " + e);
                     }, { 
                         quality: 25,
                         destinationType: destinationType.DATA_URL,
@@ -267,25 +266,29 @@
                         async: true,
                         success: function(result) {
                             if (result.lastIndex != 0) {
-                                alert("you have " + result.lastIndex + " exercise records");
-
                                 var recordStr = "";
                                 var recordIndex = result.lastIndex;
 
                                 // for..in statement in javascript are not the same like java
                                 for (i in result.histories) {
+                                    var startTime = new Date(result.histories[i].startTime.replace(/\-/g, "/"));
+                                    var endTime = new Date(result.histories[i].endTime.replace(/\-/g, "/"));
+                                    var durationTotalSecond = (endTime - startTime) / 1000;
+                                    var durationSecond = durationTotalSecond % 60;
+                                    var durationMinute = parseInt(durationTotalSecond / 60) % 60;
+                                    var durationHour = parseInt(parseInt(durationTotalSecond / 60) / 60);
+
                                     recordStr += "\
                                                 <tr id='user-record-" + recordIndex + "'>\
-                                                    <td>" + result.histories[i].startTime + "</td>\
-                                                    <td>1h 21min</td>\
+                                                    <td>" + startTime.toLocaleDateString() + "</td>\
+                                                    <td>" + durationHour + "h " + durationMinute + "m " + durationSecond + "s " + "</td>\
                                                     <td>" + result.histories[i].energy + " kWh</td>\
                                                     <td>122 kg</td>\
                                                     <td>" + result.histories[i].peakPower + " W</td>\
                                                     <td>" + result.histories[i].efficiency + " %</td>\
                                                 </tr>";
                                     recordIndex--;
-                                }
-                                alert(recordStr);
+                                }                    
                                 $("#history-table-body").html(recordStr);
                                
                                 window.location.href = "#user_exercise_history";
@@ -300,7 +303,6 @@
                 $(document).ready(function() {
                     $("#signOutBtn").click(signOut);
                     $("#start-exercise-btn").click(function() {
-                        alert($(this).val());
                         if ($(this).val().indexOf("Start") > 0) {
                             captureAndDecode(startEx_qrcodeProc);
                         } else if ($(this).val().indexOf("Stop") > 0) {
