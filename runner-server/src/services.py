@@ -218,6 +218,7 @@ def login(db):
                     print "平均能量排名:",average_rank
                     print ret                
     cr.close()
+    print "zhixingdaozhe"
     return ret
 
 @app.route('/getUserLast10History', method = 'POST')
@@ -293,11 +294,21 @@ def signup(db):
     
     if (ret["success"] == True):                       
         cr.execute("INSERT INTO user_login (user_id,password) VALUES (%s,%s)",(userid,password)) 
-        if (username == ""):             
+        db.commit()
+        cr.execute("INSERT INTO total_information (user_id) VALUES (%s)",(userid))
+        db.commit()
+        print "这能执行吧"
+        if (username == ""):  
+            print "这不会执行,前端已经写好了."           
             cr.execute("INSERT INTO user_information (user_id,nickname) VALUES (%s,%s)",(userid,userid))
+            db.commit()
         else:
             cr.execute("INSERT INTO user_information (user_id,nickname) VALUES (%s,%s)",(userid,username))
+            db.commit()
+            print "怎么回事呢"
         print "注册成功"
+    else:
+        pass
     cr.close()
     return ret  
 
