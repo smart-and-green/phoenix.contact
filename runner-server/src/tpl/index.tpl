@@ -316,7 +316,7 @@
                             } else {
                                 alert("you don't have any exercise records.");
                             }
-                        }9
+                        }
                     });
                 }
 
