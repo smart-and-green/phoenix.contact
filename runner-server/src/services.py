@@ -222,8 +222,9 @@ def login(db):
     return ret
 
 @app.route('/user_exercise_history')
-def user_exercise_history(db):
-    return template(user_exercise_history)
+def user_exercise_history():
+    return (user_exercise_history)
+    
 
 
 @app.route('/getUserLast10History', method = 'POST')
