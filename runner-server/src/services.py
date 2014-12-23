@@ -223,8 +223,8 @@ def login(db):
 
 @app.route('/user_exercise_history')
 def user_exercise_history():
-    tmpl = template('user_exercise_history')
-    return(tmpl)
+    return template('tpl/user_exercise_history')
+    
 
     
 
