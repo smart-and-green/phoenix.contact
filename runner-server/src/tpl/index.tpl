@@ -230,26 +230,26 @@
                     //     targetHeight: 480
                     // }); 
                     var mifareDefaultKey = [0xff, 0xff, 0xff, 0xff, 0xff, 0xff];
-                    var readNfcForResult = function() {
-                        var success = function(data) {  
-                            alert("card id:\n" + data.cardId);  
-                            var sector1str = "";
-                            for (var i = 0; i < 16 * 4; ++i) {
-                                sector1str += data.cardData[i].toString(16);
-                            }
-                            alert("block 1:\n" + sector1str);     
-                        };  
-                        var error = function(e) {  
-                            alert(e.reason);  
-                        };  
-                        window.plugins.nfc.read(success, error, mifareDefaultKey);
-                    };
-                    readNfcForResult();
+                    var success = function(data) {  
+                        alert("card id:\n" + data.cardId);  
+                        var sector1str = "";
+                        for (var i = 0; i < 16 * 4; ++i) {
+                            sector1str += data.cardData[i].toString(16);
+                        }
+                        alert("block 1:\n" + sector1str);     
+                    };  
+                    var error = function(e) {  
+                        alert(e.reason);  
+                    };  
+                    window.plugins.nfc.read(success, error, mifareDefaultKey);
+                    
                 }
 
                 function signOut() {
                     // 登出的时候自动清除保存的帐号和密码
                     window.localStorage.setItem("savedUserid", null);
+                    window.localStorage.setItem("savedUserid", null);
+                    window.localStorage.setItem("savedPassword", null);
                     window.localStorage.setItem("savedPassword", null);
                 }
 
@@ -279,6 +279,23 @@
                     $.ajax({
                         url: "getUserLast10History",
                         type: "post",
+                        date: {
+                            userid: userid
+                        },
+                        datatype: "json",
+                        async: true,
+                        success: function(result) {
+                            if (result.lastIndex != 0) {
+                                window.location.href = "/user_exercise_history";
+                            } else {
+                                alert("you don't have any exercise history.");
+                            }
+                        }
+                    });
+
+                    $.ajax({
+                        url: "getUserLast10History",
+                        type: "post",
                         data: {
                             userid: userid
                         },
@@ -288,6 +305,23 @@
                             if (result.lastIndex != 0) {
                                 var recordStr = "";
                                 var recordIndex = result.lastIndex;
+
+                                var newTableStr = '<table data-role="table" data-mode="columntoggle" class="ui-responsive table-stroke">\
+                                    <thead>\
+                                        <tr>\
+                                            <th>Date</th>\
+                                            <th data-priority="1">Duration</th>\
+                                            <th data-priority="1">Energy</th>\
+                                            <th data-priority="2">CO<small>2</small> reduced</th>\
+                                            <th data-priority="3">Peak power</th>\
+                                            <th data-priority="4">Efficiency</th>\
+                                        </tr>\
+                                    </thead>\
+                                    <tbody id="history-table-body">\
+                                    </tbody>\
+                                </table>';
+                                $("#history-record-list").html("");
+                                $("#history-record-list").html(newTableStr);
 
                                 // for..in statement in javascript are not the same like java
                                 for (i in result.histories) {
@@ -316,7 +350,7 @@
                             } else {
                                 alert("you don't have any exercise records.");
                             }
-                        }9
+                        }
                     });
                 }
 
@@ -345,9 +379,6 @@
                         var userid = window.localStorage.getItem("savedUserid");
                         getUserLast10ExHistory(userid);
                     });
-
-                    // test
-                    $("#startTime-thisEx").text((new Date()).toLocaleTimeString());
                 });
 
             </script>
@@ -641,6 +672,9 @@
                 <h1>History</h1>
             </div>
             <div data-role="content">
+                <div id="history-record-list">
+                    
+                </div>
                 <table data-role="table" data-mode="columntoggle" class="ui-responsive table-stroke">
                     <thead>
                         <tr>
