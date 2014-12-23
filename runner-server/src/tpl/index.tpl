@@ -276,82 +276,8 @@
 
 
                 function getUserLast10ExHistory(userid) {
-                    $.ajax({
-                        url: "getUserLast10History",
-                        type: "post",
-                        date: {
-                            userid: userid
-                        },
-                        datatype: "json",
-                        async: true,
-                        success: function(result) {
-                            if (result.lastIndex != 0) {
-                                window.location.href = "/user_exercise_history";
-                            } else {
-                                alert("you don't have any exercise history.");
-                            }
-                        }
-                    });
-
-                    $.ajax({
-                        url: "getUserLast10History",
-                        type: "post",
-                        data: {
-                            userid: userid
-                        },
-                        datatype: "json",
-                        async: true,
-                        success: function(result) {
-                            if (result.lastIndex != 0) {
-                                var recordStr = "";
-                                var recordIndex = result.lastIndex;
-
-                                var newTableStr = '<table data-role="table" data-mode="columntoggle" class="ui-responsive table-stroke">\
-                                    <thead>\
-                                        <tr>\
-                                            <th>Date</th>\
-                                            <th data-priority="1">Duration</th>\
-                                            <th data-priority="1">Energy</th>\
-                                            <th data-priority="2">CO<small>2</small> reduced</th>\
-                                            <th data-priority="3">Peak power</th>\
-                                            <th data-priority="4">Efficiency</th>\
-                                        </tr>\
-                                    </thead>\
-                                    <tbody id="history-table-body">\
-                                    </tbody>\
-                                </table>';
-                                $("#history-record-list").html("");
-                                $("#history-record-list").html(newTableStr);
-
-                                // for..in statement in javascript are not the same like java
-                                for (i in result.histories) {
-                                    var startTime = new Date(result.histories[i].startTime.replace(/\-/g, "/"));
-                                    var endTime = new Date(result.histories[i].endTime.replace(/\-/g, "/"));
-                                    var durationTotalSecond = (endTime - startTime) / 1000;
-                                    var durationSecond = durationTotalSecond % 60;
-                                    var durationMinute = parseInt(durationTotalSecond / 60) % 60;
-                                    var durationHour = parseInt(parseInt(durationTotalSecond / 60) / 60);
-
-                                    recordStr += "\
-                                                <tr id='user-record-" + recordIndex + "'>\
-                                                    <td>" + startTime.toLocaleDateString() + "</td>\
-                                                    <td>" + durationHour + "h " + durationMinute + "m " + durationSecond + "s " + "</td>\
-                                                    <td>" + result.histories[i].energy + " kWh</td>\
-                                                    <td>122 kg</td>\
-                                                    <td>" + result.histories[i].peakPower + " W</td>\
-                                                    <td>" + result.histories[i].efficiency + " %</td>\
-                                                </tr>";
-                                    recordIndex--;
-                                }
-                                $("#history-table-body").html("");
-                                $("#history-table-body").html(recordStr);
-                               
-                                window.location.href = "#user_exercise_history";
-                            } else {
-                                alert("you don't have any exercise records.");
-                            }
-                        }
-                    });
+                    //window.location.href = "#user_exercise_history";
+                    window.location.href = "/user_exercise_history";
                 }
 
                 
