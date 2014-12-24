@@ -221,6 +221,14 @@ def login(db):
     print "zhixingdaozhe"
     return ret
 
+@app.route('/user_exercise_history')
+def user_exercise_history():
+    return template('tpl/user_exercise_history')
+    
+
+    
+
+
 @app.route('/getUserLast10History', method = 'POST')
 def getUserLast10History(db):
     userid = request.POST.get('userid')
@@ -295,7 +303,7 @@ def signup(db):
     if (ret["success"] == True):                       
         cr.execute("INSERT INTO user_login (user_id,password) VALUES (%s,%s)",(userid,password)) 
         db.commit()
-        cr.execute("INSERT INTO total_information (user_id) VALUES (%s)",(userid))
+        cr.execute("INSERT INTO total_information (user_id,exercise_number) VALUES (%s,%s)",(userid,0))
         db.commit()
         print "这能执行吧"
         if (username == ""):  

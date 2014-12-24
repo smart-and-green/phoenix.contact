@@ -189,8 +189,8 @@
 
                     // 将解码的code打包到exerciseData
                     var exerciseData = {
-                        startTime: new Date(),
-                        endTime: new Date(),
+                        startTime: (new Date()).toLocaleDateString(),
+                        endTime: (new Date()).toLocaleDateString(),
                         energy: 0.12,
                         peakPower: 450.1,
                         efficiency: 0.78,
@@ -230,26 +230,27 @@
                     //     targetHeight: 480
                     // }); 
                     var mifareDefaultKey = [0xff, 0xff, 0xff, 0xff, 0xff, 0xff];
-                    var readNfcForResult = function() {
-                        var success = function(data) {  
-                            alert("card id:\n" + data.cardId);  
-                            var sector1str = "";
-                            for (var i = 0; i < 16 * 4; ++i) {
-                                sector1str += data.cardData[i].toString(16);
-                            }
-                            alert("block 1:\n" + sector1str);     
-                        };  
-                        var error = function(e) {  
-                            alert(e.reason);  
-                        };  
-                        window.plugins.nfc.read(success, error, mifareDefaultKey);
-                    };
-                    readNfcForResult();
+                    var success = function(data) {  
+                        alert("card id:\n" + data.cardId);  
+                        var sector1str = "";
+                        for (var i = 0; i < 16 * 4; ++i) {
+                            sector1str += data.cardData[i].toString(16);
+                        }
+                        alert("block 1:\n" + sector1str);
+			fnCallback("feed back data");     
+                    };  
+                    var error = function(e) {  
+                        alert(e.reason);  
+                    };  
+                    window.plugins.nfc.read(success, error, mifareDefaultKey);
+                    
                 }
 
                 function signOut() {
                     // 登出的时候自动清除保存的帐号和密码
                     window.localStorage.setItem("savedUserid", null);
+                    window.localStorage.setItem("savedUserid", null);
+                    window.localStorage.setItem("savedPassword", null);
                     window.localStorage.setItem("savedPassword", null);
                 }
 
@@ -276,7 +277,7 @@
 
 
                 function getUserLast10ExHistory(userid) {
-                    $.ajax({
+					$.ajax({
                         url: "getUserLast10History",
                         type: "post",
                         data: {
@@ -301,15 +302,14 @@
                                     recordStr += "\
                                                 <tr id='user-record-" + recordIndex + "'>\
                                                     <td>" + startTime.toLocaleDateString() + "</td>\
-                                                    <td>" + durationHour + "h " + durationMinute + "m " + durationSecond + "s " + "</td>\
-                                                    <td>" + result.histories[i].energy + " kWh</td>\
-                                                    <td>122 kg</td>\
-                                                    <td>" + result.histories[i].peakPower + " W</td>\
-                                                    <td>" + result.histories[i].efficiency + " %</td>\
+                                                    <td class='ui-table-priority-1'>" + durationHour + "h " + durationMinute + "m " + durationSecond + "s " + "</td>\
+                                                    <td class='ui-table-priority-1'>" + result.histories[i].energy + " kWh</td>\
+                                                    <td class='ui-table-priority-2'>122 kg</td>\
+                                                    <td class='ui-table-priority-3'>" + result.histories[i].peakPower + " W</td>\
+                                                    <td class='ui-table-priority-4'>" + result.histories[i].efficiency + " %</td>\
                                                 </tr>";
                                     recordIndex--;
                                 }
-                                $("#history-table-body").html("");
                                 $("#history-table-body").html(recordStr);
                                
                                 window.location.href = "#user_exercise_history";
@@ -345,9 +345,6 @@
                         var userid = window.localStorage.getItem("savedUserid");
                         getUserLast10ExHistory(userid);
                     });
-
-                    // test
-                    $("#startTime-thisEx").text((new Date()).toLocaleTimeString());
                 });
 
             </script>
@@ -641,6 +638,9 @@
                 <h1>History</h1>
             </div>
             <div data-role="content">
+                <div id="history-record-list">
+                    
+                </div>
                 <table data-role="table" data-mode="columntoggle" class="ui-responsive table-stroke">
                     <thead>
                         <tr>
