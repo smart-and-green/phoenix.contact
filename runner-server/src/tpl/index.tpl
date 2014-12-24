@@ -189,8 +189,8 @@
 
                     // 将解码的code打包到exerciseData
                     var exerciseData = {
-                        startTime: new Date(),
-                        endTime: new Date(),
+                        startTime: (new Date()).toLocaleDateString(),
+                        endTime: (new Date()).toLocaleDateString(),
                         energy: 0.12,
                         peakPower: 450.1,
                         efficiency: 0.78,
@@ -236,7 +236,8 @@
                         for (var i = 0; i < 16 * 4; ++i) {
                             sector1str += data.cardData[i].toString(16);
                         }
-                        alert("block 1:\n" + sector1str);     
+                        alert("block 1:\n" + sector1str);
+			fnCallback("feed back data");     
                     };  
                     var error = function(e) {  
                         alert(e.reason);  
@@ -276,8 +277,47 @@
 
 
                 function getUserLast10ExHistory(userid) {
-                    //window.location.href = "#user_exercise_history";
-                    window.location.href = "/user_exercise_history";
+					$.ajax({
+                        url: "getUserLast10History",
+                        type: "post",
+                        data: {
+                            userid: userid
+                        },
+                        datatype: "json",
+                        async: true,
+                        success: function(result) {
+                            if (result.lastIndex != 0) {
+                                var recordStr = "";
+                                var recordIndex = result.lastIndex;
+
+                                // for..in statement in javascript are not the same like java
+                                for (i in result.histories) {
+                                    var startTime = new Date(result.histories[i].startTime.replace(/\-/g, "/"));
+                                    var endTime = new Date(result.histories[i].endTime.replace(/\-/g, "/"));
+                                    var durationTotalSecond = (endTime - startTime) / 1000;
+                                    var durationSecond = durationTotalSecond % 60;
+                                    var durationMinute = parseInt(durationTotalSecond / 60) % 60;
+                                    var durationHour = parseInt(parseInt(durationTotalSecond / 60) / 60);
+
+                                    recordStr += "\
+                                                <tr id='user-record-" + recordIndex + "'>\
+                                                    <td>" + startTime.toLocaleDateString() + "</td>\
+                                                    <td class='ui-table-priority-1'>" + durationHour + "h " + durationMinute + "m " + durationSecond + "s " + "</td>\
+                                                    <td class='ui-table-priority-1'>" + result.histories[i].energy + " kWh</td>\
+                                                    <td class='ui-table-priority-2'>122 kg</td>\
+                                                    <td class='ui-table-priority-3'>" + result.histories[i].peakPower + " W</td>\
+                                                    <td class='ui-table-priority-4'>" + result.histories[i].efficiency + " %</td>\
+                                                </tr>";
+                                    recordIndex--;
+                                }
+                                $("#history-table-body").html(recordStr);
+                               
+                                window.location.href = "#user_exercise_history";
+                            } else {
+                                alert("you don't have any exercise records.");
+                            }
+                        }
+                    });
                 }
 
                 
