@@ -11,3 +11,14 @@
 .text-center {
 	text-align: center;
 }
+
+.em-tips-timer-sec {
+    font-size: 2em;
+    color: gray;
+}
+
+.em-tips-timer-minhour {
+    font-size: 4em;
+    color: blue;
+}
+

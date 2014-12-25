@@ -10,24 +10,6 @@
         
         <script type="text/javascript" src="js/cordova.js"></script>
 
-        <script type="text/javascript" src="js/qr/src/grid.js"></script>
-        <script type="text/javascript" src="js/qr/src/version.js"></script>
-        <script type="text/javascript" src="js/qr/src/detector.js"></script>
-        <script type="text/javascript" src="js/qr/src/formatinf.js"></script>
-        <script type="text/javascript" src="js/qr/src/errorlevel.js"></script>
-        <script type="text/javascript" src="js/qr/src/bitmat.js"></script>
-        <script type="text/javascript" src="js/qr/src/datablock.js"></script>
-        <script type="text/javascript" src="js/qr/src/bmparser.js"></script>
-        <script type="text/javascript" src="js/qr/src/datamask.js"></script>
-        <script type="text/javascript" src="js/qr/src/rsdecoder.js"></script>
-        <script type="text/javascript" src="js/qr/src/gf256poly.js"></script>
-        <script type="text/javascript" src="js/qr/src/gf256.js"></script>
-        <script type="text/javascript" src="js/qr/src/decoder.js"></script>
-        <script type="text/javascript" src="js/qr/src/qrcode.js"></script>
-        <script type="text/javascript" src="js/qr/src/findpat.js"></script>
-        <script type="text/javascript" src="js/qr/src/alignpat.js"></script>
-        <script type="text/javascript" src="js/qr/src/databr.js"></script>
-
         <script type="text/javascript" src="js/api.camera.js"></script>
         <script type="text/javascript" charset="utf-8" src="js/api.myPlugin.js"></script>
         <script type="text/javascript" charset="utf-8" src="js/api.nfcPlugin.js"></script>
@@ -146,6 +128,7 @@
                 
                 var IntvId;
                 var StartSecStamp = 0;
+		var EndSecStamp = 0;
                 var EquipmentId = "";
 
                 function updateDurationDisp() {
@@ -153,16 +136,17 @@
                     var currentMillis = myDate.getTime();
                     var currentSecCount = currentMillis / 1000 - StartSecStamp;
                     var currentMinCount = currentSecCount / 60;
+                    $("#exercise-duration-sec").text(parseInt(currentSecCount % 60));
                     $("#exercise-duration-hour").text(parseInt(currentMinCount / 60));
                     $("#exercise-duration-min").text(parseInt(currentMinCount % 60));
                     $("#duration-displayer").fadeIn();
                 }
 
-                // 调用了此回调函数表示二维码解码成功
-                // 处理解码后的qrcode，从中读取运动设备信息
+                // 调用了此回调函数表示nfc读取成功
+                // 处理解码后的卡信息，从中读取运动设备信息
                 // 记录运动设备信息和运动量信息，并显示
                 // 同时维护按钮内容的显示
-                function startEx_qrcodeProc(code) {
+                function startEx_startTimeInfoProc(code) {
                     console.log(code);
                     alert(code);
 
@@ -175,9 +159,13 @@
                     IntvId = window.setInterval(updateDurationDisp, 1000);
 
                     // 从code中读出EquipmentId
-                    EquipmentId = "defaultEquipmentId";
+                    EquipmentId = "bike001";
+                    
+		    // display the dashboard
+		    $("#exercise-achievement-thisTime").slideUp();
+		    $("#exercise-timer").slideDown();
                 }
-                function stopEx_qrcodeProc(code) {
+                function stopEx_endTimeInfoProc(code) {
                     console.log(code);
                     alert(code);
 
@@ -185,29 +173,34 @@
                     $("#start-exercise-btn").text("Start to exercise");
 
                     // 停止计时
-                    window.clearInterval(IntvId);
+                    window.clearInterval(IntvId); 
+                    var myDate = new Date();
+                    var currentMillis = myDate.getTime();
+                    EndSecStamp = currentMillis / 1000;
 
                     // 将解码的code打包到exerciseData
+                    var startTime = new Date(StartSecStamp * 1000);
+                    var endTime = new Date(EndSecStamp * 1000);
                     var exerciseData = {
-                        startTime: (new Date()).toLocaleDateString(),
-                        endTime: (new Date()).toLocaleDateString(),
+                        startTime: startTime.toLocaleDateString() + " " + startTime.toLocaleTimeString(),
+                        endTime: endTime.toLocaleDateString() + " " + endTime.toLocaleTimeString(),
                         energy: 0.12,
                         peakPower: 450.1,
                         efficiency: 0.78,
                         peakCurrent: 12.1,
                         peakVoltage: 45.7,
-                        equipmentid: "bike001"
+                        equipmentid: EquipmentId
                     };
 
                     var userid = window.localStorage.getItem("savedUserid");
                     uploadExRecord(userid, exerciseData);
 
                     // 上传完后把对应内容显示出来
-                    $("#startTime-thisEx").text(exerciseData.startTime);
-                    $("#endTime-thisEx").text(exerciseData.endTime);
+                    $("#startTime-thisEx").text(startTime.toLocaleTimeString());
+                    $("#endTime-thisEx").text(endTime.toLocaleTimeString());
 
                     // 计算持续时间
-                    var durationInMin = (exerciseData.endTime.getTime() - exerciseData.startTime.getTime()) / 1000 / 60;
+                    var durationInMin = (EndSecStamp - StartSecStamp) / 60;
                     $("#duration-hour-thisEx").text(parseInt(durationInMin / 60));
                     $("#duration-min-thisEx").text(parseInt(durationInMin % 60));
 
@@ -215,7 +208,11 @@
                     $("#peak-power-thisTime").text(exerciseData.peakPower);
                     $("#efficiency-thisTime").text(exerciseData.efficiency);
                     $("#co2-reduced-thisTime").text(exerciseData.energy * 10);  // 换算得到
-                }
+                    
+		    // display the dashboard
+		    $("#exercise-achievement-thisTime").slideDown();
+		    $("#exercise-timer").slideUp();
+		}
 
                 function captureAndDecode(fnCallback) {
                     // navigator.camera.getPicture(function(image) {
@@ -277,7 +274,7 @@
 
 
                 function getUserLast10ExHistory(userid) {
-					$.ajax({
+                    $.ajax({
                         url: "getUserLast10History",
                         type: "post",
                         data: {
@@ -290,7 +287,7 @@
                                 var recordStr = "";
                                 var recordIndex = result.lastIndex;
 
-                                // for..in statement in javascript are not the same like java
+                                // for..in statement in javascript are not the same as java
                                 for (i in result.histories) {
                                     var startTime = new Date(result.histories[i].startTime.replace(/\-/g, "/"));
                                     var endTime = new Date(result.histories[i].endTime.replace(/\-/g, "/"));
@@ -311,7 +308,8 @@
                                     recordIndex--;
                                 }
                                 $("#history-table-body").html(recordStr);
-                               
+                                $("user-history-records-count").text(result.lastIndex);
+
                                 window.location.href = "#user_exercise_history";
                             } else {
                                 alert("you don't have any exercise records.");
@@ -326,9 +324,9 @@
                     $("#start-exercise-btn").click(function() {
                         alert($(this).text());
                         if ($(this).text().indexOf("Start") >= 0) {
-                            captureAndDecode(startEx_qrcodeProc);
+                            captureAndDecode(startEx_startTimeInfoProc);
                         } else if ($(this).text().indexOf("Stop") >= 0) {
-                            captureAndDecode(stopEx_qrcodeProc);
+                            captureAndDecode(stopEx_endTimeInfoProc);
                         }
 
                         // 刚按下按钮拍照后将按钮禁用，3秒后恢复
@@ -400,23 +398,24 @@
 
                 <button id="start-exercise-btn">Start to exercise</button><br>
                 
-                <p class="developer-markdown">the fallowing content only displayed when starting exercising</p>
-                <div id="duration-displayer" style="color:blue;font-size:5em;">
-                    <center>
-                        <span id="exercise-duration-hour">0</span><small>h </small>
-                        <span id="exercise-duration-min">0</span><small>min </small>
-                    </center>
-                </div>
-                <div id="Exercise-equipment-nfo">
-                    <p>Exercise equipment information:</p>
-                    <ul>
-                        <li>Exercise place: gym 001</li>
-                        <li>equipment type: bike</li>
-                    </ul>
-                </div>
+                <div id="exercise-timer" style="display:none;">
+		    <div id="duration-displayer">
+                        <center>
+                            <span id="exercise-duration-hour" class="em-tips-timer-minhour">0</span><small class="em-tips-timer-minhour">h </small>
+                            <span id="exercise-duration-min" class="em-tips-timer-minhour">0</span><small class="em-tips-timer-minhour">m </small>
+                            <span id="exercise-duration-sec" class="em-tips-timer-sec">0</span><small class="em-tips-timer-sec">s </small>
+                        </center>
+                    </div>
+                    <div id="Exercise-equipment-nfo">
+                        <p>Exercise equipment information:</p>
+                        <ul>
+                            <li>Exercise place: gym 001</li>
+                            <li>equipment type: bike</li>
+                        </ul>
+                    </div>
+		</div>
 
-                <p class="developer-markdown">only displayed when finished exercising</p>
-                <div>
+                <div id="exercise-achievement-thisTime" style="display:none;">
                     <table data-role="table" data-mode="column" class="ui-responsive table-stroke">
                         <thead>
                             <tr>
@@ -621,7 +620,7 @@
 
         <div data-role="page" id="user_exercise_history">
             <script type="text/javascript">
-                $(document).ready(function() {
+                $(document).on("pagebeforeshow", "#user_exercise_history", function() {
                     $("#history-table-body tr").bind({
                         mouseover: function() {
                             $(this).css("backgroundColor", "lightGray");
@@ -638,39 +637,30 @@
                 <h1>History</h1>
             </div>
             <div data-role="content">
-                <div id="history-record-list">
-                    
+                <div id="user-exercise-history-tableField">
+                    <table data-role="table" data-mode="columntoggle" class="ui-responsive table-stroke">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th data-priority="1">Duration</th>
+                                <th data-priority="1">Energy</th>
+                                <th data-priority="2">CO<small>2</small> reduced</th>
+                                <th data-priority="3">Peak power</th>
+                                <th data-priority="4">Efficiency</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body">
+                            <tr>
+                                <td>2014-11-23</td>
+                                <td>1h 21min</td>
+                                <td>1.2 kWh</td>
+                                <td>122 kg</td>
+                                <td>300 W</td>
+                                <td>56 %</td>
+                            </tr>
+                         </tbody>
+                    </table>
                 </div>
-                <table data-role="table" data-mode="columntoggle" class="ui-responsive table-stroke">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th data-priority="1">Duration</th>
-                            <th data-priority="1">Energy</th>
-                            <th data-priority="2">CO<small>2</small> reduced</th>
-                            <th data-priority="3">Peak power</th>
-                            <th data-priority="4">Efficiency</th>
-                        </tr>
-                    </thead>
-                    <tbody id="history-table-body">
-                        <tr>
-                            <td>2014-11-23</td>
-                            <td>1h 21min</td>
-                            <td>1.2 kWh</td>
-                            <td>122 kg</td>
-                            <td>300 W</td>
-                            <td>56 %</td>
-                        </tr>
-                        <tr>
-                            <td>2014-11-23</td>
-                            <td>1h 21min</td>
-                            <td>1.2 kWh</td>
-                            <td>122 kg</td>
-                            <td>300 W</td>
-                            <td>56 %</td>
-                        </tr>
-                     </tbody>
-                </table>
                 <p>
                     <center style="color:gray;font-size:0.8em;">
                         <span id="user-history-records-count">2</span> records
@@ -686,7 +676,7 @@
                 <h1>[Data(e.g. 2014-11-24)]</h1>
             </div>
             <div data-role="content">
-               
+                 
             </div>
         </div>
     </body>
