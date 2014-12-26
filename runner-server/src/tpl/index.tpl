@@ -57,15 +57,16 @@
                                 $("#co2-average").text(userData.average.energy * 10);
                                 $("#energy-rank-average").text(userData.average.globalRank);
 
-                                $("#duration-lastMonth").text(userData.lastMonthSummary.duration);
-                                $("#energy-lastMonth").text(userData.lastMonthSummary.energy);
-                                $("#co2-lastMonth").text(userData.lastMonthSummary.energy * 10);
-                                $("#energy-rank-lastMonth").text(userData.lastMonthSummary.globalRank);
+                                // 等待服务器数据接口更新
+                                //$("#duration-lastMonth").text(userData.lastMonthSummary.duration);
+                                //$("#energy-lastMonth").text(userData.lastMonthSummary.energy);
+                                //$("#co2-lastMonth").text(userData.lastMonthSummary.energy * 10);
+                                //$("#energy-rank-lastMonth").text(userData.lastMonthSummary.globalRank);
 
-                                $("#duration-thisMonth").text(userData.thisMonthSummary.duration);
-                                $("#energy-thisMonth").text(userData.thisMonthSummary.energy);
-                                $("#co2-thisMonth").text(userData.thisMonthSummary.energy * 10);
-                                $("#energy-rank-thisMonth").text(userData.thisMonthSummary.globalRank);
+                                //$("#duration-thisMonth").text(userData.thisMonthSummary.duration);
+                                //$("#energy-thisMonth").text(userData.thisMonthSummary.energy);
+                                //$("#co2-thisMonth").text(userData.thisMonthSummary.energy * 10);
+                                //$("#energy-rank-thisMonth").text(userData.thisMonthSummary.globalRank);
                             } else {
                                 $("#login-result").text("user name or password error.");
                             }
@@ -272,6 +273,19 @@
                     });
                 }
 
+		function getUserLastMonthExHistory(userid) {
+                    $.ajax({
+			url: "getUserLastMonthExHistory",
+                        type: "post",
+			data: { userid: userid },
+			datatype: "json",
+			async: true,
+			success: function(result) {
+			    if (result.lastIndex != 0) {
+			    }
+			}
+		    });
+		}
 
                 function getUserLast10ExHistory(userid) {
                     $.ajax({
@@ -284,36 +298,51 @@
                         async: true,
                         success: function(result) {
                             if (result.lastIndex != 0) {
-                                var recordStr = "";
+				var recordDividerTemplate = "\
+                        		<li data-role='list-divider'>\
+                            			<span>[recent-month]</span>\
+			    			<span class='ui-li-count'>[count]</span>\
+                        		</li>";
+				var recordTemplate = "\
+                        		<li>\
+                              		    <a href='[link]'>\
+                               			<h2>[exercise-type]</h2>\
+                                		<p>[start-time] <strong>duration:</strong> [duration]</p>\
+	                        	  	<p class='ui-li-aside'><strong>[energy]</strong></p>\
+                            		    </a>\
+                        		</li>";
                                 var recordIndex = result.lastIndex;
+				var thisYear = new Date().getFullYear();
+				var thisMonth = new Date().getMonth();
 
-                                // for..in statement in javascript are not the same as java
-                                for (i in result.histories) {
-                                    var startTime = new Date(result.histories[i].startTime.replace(/\-/g, "/"));
-                                    var endTime = new Date(result.histories[i].endTime.replace(/\-/g, "/"));
+				var index = 0;
+                                for (; result.histories[index] != null; index++) {
+                                    var startTime = new Date(result.histories[index].startTime.replace(/\-/g, "/"));
+                                    var endTime = new Date(result.histories[index].endTime.replace(/\-/g, "/"));
                                     var durationTotalSecond = (endTime - startTime) / 1000;
                                     var durationSecond = durationTotalSecond % 60;
                                     var durationMinute = parseInt(durationTotalSecond / 60) % 60;
                                     var durationHour = parseInt(parseInt(durationTotalSecond / 60) / 60);
-
-                                    recordStr += "\
-                                                <tr id='user-record-" + recordIndex + "'>\
-                                                    <td>" + startTime.toLocaleDateString() + "</td>\
-                                                    <td class='ui-table-priority-1'>" + durationHour + "h " + durationMinute + "m " + durationSecond + "s " + "</td>\
-                                                    <td class='ui-table-priority-1'>" + result.histories[i].energy + " kWh</td>\
-                                                    <td class='ui-table-priority-2'>122 kg</td>\
-                                                    <td class='ui-table-priority-3'>" + result.histories[i].peakPower + " W</td>\
-                                                    <td class='ui-table-priority-4'>" + result.histories[i].efficiency + " %</td>\
-                                                </tr>";
+				
+				    var divider = recordDividerTemplate.replace("[recent-month]", thisYear + "-" + thisMonth).replace("[count]", "1");
+				    var record = recordTemplate
+						.replace("[link]", "#")
+						.replace("[exercise-type]", "bike")
+						.replace("[energy]", result.histories[index].energy + " kJ")
+						.replace("[duration]", durationHour + "h " + durationMinute + "m " + durationSecond + "s")
+						.replace("[start-time]", startTime.getDate() + "th " +  startTime.toLocaleTimeString());
                                     recordIndex--;
+				    $("#user-exercise-record-list").append(divider + record);
                                 }
-                                $("#history-table-body").html(recordStr);
-                                $("user-history-records-count").text(result.lastIndex);
+                                $("#user-history-records-count").text(result.lastIndex);
 
                                 window.location.href = "#user_exercise_history";
                             } else {
                                 alert("you don't have any exercise records.");
                             }
+                        },
+	                error: function() {
+                           alert("loading history error!");
                         }
                     });
                 }
@@ -329,20 +358,21 @@
                             captureAndDecode(stopEx_endTimeInfoProc);
                         }
 
-                        // 刚按下按钮拍照后将按钮禁用，3秒后恢复
-                        // 是否成功获取二维码要等待解码结果，解码结果回调函数会处理按钮显示信息。
+                        // 刚按开始运动或者结束运动后，按钮会禁用1.5s
+                        // 避免信息尚未读取或处理成功又进行了第二次读取或处理
                         $(this).attr("disabled", true);
                         window.setTimeout(function() {
                             $("#start-exercise-btn").removeAttr("disabled");
-                        }, 3000);
+                        }, 1500);
                     });
 
                     $("#user-ex-history-btn").click(function() {
 
                         // 需要通过session获取userid
                         var userid = window.localStorage.getItem("savedUserid");
-                        getUserLast10ExHistory(userid);
-                    });
+                        alert(userid);
+                	getUserLast10ExHistory(userid);
+                   });
                 });
 
             </script>
@@ -621,6 +651,7 @@
         <div data-role="page" id="user_exercise_history">
             <script type="text/javascript">
                 $(document).on("pagebeforeshow", "#user_exercise_history", function() {
+                    $("#history-table-body tr").unbind();
                     $("#history-table-body tr").bind({
                         mouseover: function() {
                             $(this).css("backgroundColor", "lightGray");
@@ -637,29 +668,40 @@
                 <h1>History</h1>
             </div>
             <div data-role="content">
-                <div id="user-exercise-history-tableField">
-                    <table data-role="table" data-mode="columntoggle" class="ui-responsive table-stroke">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th data-priority="1">Duration</th>
-                                <th data-priority="1">Energy</th>
-                                <th data-priority="2">CO<small>2</small> reduced</th>
-                                <th data-priority="3">Peak power</th>
-                                <th data-priority="4">Efficiency</th>
-                            </tr>
-                        </thead>
-                        <tbody id="history-table-body">
-                            <tr>
-                                <td>2014-11-23</td>
-                                <td>1h 21min</td>
-                                <td>1.2 kWh</td>
-                                <td>122 kg</td>
-                                <td>300 W</td>
-                                <td>56 %</td>
-                            </tr>
-                         </tbody>
-                    </table>
+                <div id="user-exercise-history-field">
+                    <ul id="user-exercise-record-list" data-role="listview" data-inset="true">
+
+                        <li data-role="list-divider">
+                            <span>[yyyy/MM]</span>
+			    <span class="ui-li-count">[count]</span>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <h2>[running]</h2>
+                                <p>2014/11/23 12:50 duration: 1h 30m</p>
+	                        <p class="ui-li-aside">energy:<strong>[energy]</strong></p>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <h2>[running]</h2>
+                                <p>2014/11/23 12:50 duration: 1h 30m</p>
+	                        <p class="ui-li-aside">energy:<strong>[energy]</strong></p>
+                            </a>
+                        </li>
+
+                        <li data-role="list-divider">
+                            <span >[yyyy/MM]</span>
+			    <span class="ui-li-count">[count]</span>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <h2>[running]</h2>
+                                <p>2014/11/23 12:50 duration: 1h 30m</p>
+	                        <p class="ui-li-aside">energy:<strong>[energy]</strong></p>
+                            </a>
+                        </li>
+                    </ul>
                 </div>
                 <p>
                     <center style="color:gray;font-size:0.8em;">
