@@ -11,101 +11,218 @@
 	</head>
 
 	<body>
-		<div data-role="page" id="user_exercise_history">
+		<div data-role="page" id="user_exercise_history" date-ajax="false">
             <script type="text/javascript">
-                
-                $(document).ready(function() {
-                	var gUserid = window.localStorage.getItem("savedUserid");
-                	$.ajax({
-                        url: "getUserLast10History",
+                var loadedRecord = {
+                    earliestYear: 0,
+                    earliestMonth: 0,
+                    count: 0,
+                    noMoreExRecord: false
+                };
+
+                function addUserMonthExRecord(userid, year, month) {
+                    if (loadedRecord.noMoreExRecord == true) {
+                        return;
+                    } else {
+                        loadedRecord.earliestYear = year;
+                        loadedRecord.earliestMonth = month;
+                    }
+
+                    $.ajax({
+                        url: "getUserMonthExRecord",
                         type: "post",
-                        data: {
-                            userid: gUserid
+                        data: { 
+                            userid: userid,
+                            year: year,
+                            month: month
                         },
                         datatype: "json",
                         async: true,
                         success: function(result) {
-                            if (result.lastIndex != 0) {
-                                var recordStr = "";
-                                var recordIndex = result.lastIndex;
+                            // save the status of loaded record
+                            loadedRecord.noMoreExRecord = result.noMoreExRecord;
 
-                                // for..in statement in javascript are not the same like java
-                                for (i in result.histories) {
-                                    var startTime = new Date(result.histories[i].startTime.replace(/\-/g, "/"));
-                                    var endTime = new Date(result.histories[i].endTime.replace(/\-/g, "/"));
+                            if (result.count > 0) {
+                                loadedRecord.count += result.count;
+
+                                var recordDividerTemplate = "\
+                                    <li data-role='list-divider'>\
+                                        <span>[recent-month]</span>\
+                                        <span class='ui-li-count'>[count]</span>\
+                                    </li>";
+                                var recordTemplate = "\
+                                    <li>\
+                                        <a href='[link]'>\
+                                            <h2>[exercise-type]</h2>\
+                                            <p>[start-time] <strong>duration:</strong> [duration]</p>\
+                                            <p class='ui-li-aside'><strong>[energy]</strong>kJ</p>\
+                                        </a>\
+                                    </li>";
+
+                                // 将最近两个月的标签用this month和last month表示 
+                                var thisMonth = {
+                                    year: new Date().getFullYear(),
+                                    month: new Date().getMonth()
+                                };
+                                var lastMonth = {
+                                    year: thisMonth.year,
+                                    month: thisMonth.month - 1
+                                };
+                                if (lastMonth.month < 0) {
+                                    lastMonth.month = 11;
+                                    lastMonth.year--;
+                                }
+                                var recentMonthLabel = year + "-" + (month + 1);
+                                if (year == thisMonth.year && month == thisMonth.month){
+                                    recentMonthLabel = "This month";  
+                                } else if (year == lastMonth.year && month == lastMonth.month) {
+                                    recentMonthLabel = "Last Month";
+                                }
+
+                                var divider = recordDividerTemplate
+                                        .replace("[recent-month]", recentMonthLabel)
+                                        .replace("[count]", result.count + "");
+                                var record = "";
+                                for (var index = 0; result.histories[index] != null; ++index) {
+                                    var startTime = new Date(result.histories[index].startTime.replace(/\-/g, "/"));
+                                    var endTime = new Date(result.histories[index].endTime.replace(/\-/g, "/"));
                                     var durationTotalSecond = (endTime - startTime) / 1000;
                                     var durationSecond = durationTotalSecond % 60;
                                     var durationMinute = parseInt(durationTotalSecond / 60) % 60;
                                     var durationHour = parseInt(parseInt(durationTotalSecond / 60) / 60);
-
-                                    recordStr += "\
-                                                <tr id='user-record-" + recordIndex + "'>\
-                                                    <td>" + startTime.toLocaleDateString() + "</td>\
-                                                    <td data-priority='1'>" + durationHour + "h " + durationMinute + "m " + durationSecond + "s " + "</td>\
-                                                    <td data-priority='1'>" + result.histories[i].energy + " kWh</td>\
-                                                    <td data-priority='2'>122 kg</td>\
-                                                    <td data-priority='3'>" + result.histories[i].peakPower + " W</td>\
-                                                    <td data-priority='4'>" + result.histories[i].efficiency + " %</td>\
-                                                </tr>";
-                                    recordIndex--;
+            
+                                    var dateStr = "";
+                                    var dayOfMonth = startTime.getDate();
+                                    if (dayOfMonth == 1 || dayOfMonth == 21 || dayOfMonth == 31) {
+                                       dateStr = dayOfMonth + "st ";
+                                    } else if (dayOfMonth == 2 || dayOfMonth == 22) {
+                                       dateStr = dayOfMonth + "nd ";
+                                    } else if (dayOfMonth == 3 || dayOfMonth == 23) {
+                                       dateStr = dayOfMonth + "rd ";
+                                    } else {
+                                       dateStr = dayOfMonth + "th ";
+                                    }
+                                    record += recordTemplate
+                                            .replace("[link]", "#")
+                                            .replace("[exercise-type]", "bike")
+                                            .replace("[energy]", result.histories[index].energy)
+                                            .replace("[duration]", durationHour + "h " + durationMinute + "m " + durationSecond + "s")
+                                            .replace("[start-time]", dateStr + startTime.toLocaleTimeString());
                                 }
-                                $("#history-table-body").html(recordStr);
-                               
-                                window.location.href = "#user_exercise_history";
-                            } else {
-                                alert("you don't have any exercise records.");
+                                $("#user-exercise-record-list").append(divider + record);
+
+                                // add this statement to refresh the list after loaded.
+                                $("ul").listview("refresh");
+                            } else if (loadedRecord.noMoreExRecord == false) {
+                                month--;
+                                if (month < 0) {
+                                    month = 11;
+                                    year--;
+                                }
+                                addUserMonthExRecord(userid, year, month);
                             }
+                        },
+                        error: function(e) {
+                            alert("no response from server");
+                        }
+                    });
+                }
+
+                
+                $(document).ready(function() {
+                    alert("ex page");
+
+                    // 先清除历史记录列表中原有的数据，重新从服务器加载
+                    $("#user-exercise-record-list").html(""); 
+                    loadedRecord.count = 0;
+                    
+                    // when enter this page, the following method should be called to init the listview
+                    $("ul").listview();
+                    
+                    // 进入这个页面的时候自动加载这个月的历史记录
+                    // 如果这个月没有记录，会自动加载上个月的，以此类推
+                    // 如果这个月没有记录，会自动加载上个月的，以此类推
+                    // loadedRecord对象中会保存最久以前所加载记录的年份和月份，即列表最下面的记录的月份
+                    var userid = window.localStorage.getItem("savedUserid");
+                    var thisYear = new Date().getFullYear();
+                    var thisMonth = new Date().getMonth();
+                    addUserMonthExRecord(userid, thisYear, thisMonth); 
+
+                    $("#add-more-btn").click(function() {
+                        if (loadedRecord.noMoreExRecord == true) {
+                            $(this).text("no more exercise record");
+                        } else {
+                            // there are still some record unloaded
+                            loadedRecord.earliestMonth--;
+                            if (loadedRecord.earliestMonth < 0) {
+                                loadedRecord.earliestMonth = 11;
+                                loadedRecord.earliestYear--;
+                            }
+                            addUserMonthExRecord(userid, loadedRecord.earliestYear, loadedRecord.earliestMonth);
                         }
                     });
                 });
+                
 
             </script>
             <div data-role="header">
-                <a href="#user_home_page" data-rel="back"
+                <a href="/index#user_home_page" data-rel="back"
                     class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all">Back</a>
                 <h1>History</h1>
             </div>
             <div data-role="content">
-                <div id="history-record-list">
-                    
+                <div id="user-exercise-history-field">
+                    <ul id="user-exercise-record-list" data-role="listview" data-inset="true">
+
+                        <li data-role="list-divider">
+                            <span>[yyyy/MM]</span>
+                            <span class="ui-li-count">[count]</span>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <h2>[running]</h2>
+                                <p>2014/11/23 12:50 duration: 1h 30m</p>
+                            <p class="ui-li-aside">energy:<strong>[energy]</strong></p>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <h2>[running]</h2>
+                                <p>2014/11/23 12:50 duration: 1h 30m</p>
+                            <p class="ui-li-aside">energy:<strong>[energy]</strong></p>
+                            </a>
+                        </li>
+
+                        <li data-role="list-divider">
+                            <span >[yyyy/MM]</span>
+                            <span class="ui-li-count">[count]</span>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <h2>[running]</h2>
+                                <p>2014/11/23 12:50 duration: 1h 30m</p>
+                            <p class="ui-li-aside">energy:<strong>[energy]</strong></p>
+                            </a>
+                        </li>
+                    </ul>
+                    <div id="add-more-btn" style="padding:1em;color:gray;text-align:center;">
+                        touch to add more
+                    </div>
                 </div>
-                <table data-role="table" data-mode="columntoggle" class="ui-responsive table-stroke">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th data-priority="1">Duration</th>
-                            <th data-priority="1">Energy</th>
-                            <th data-priority="2">CO<small>2</small> reduced</th>
-                            <th data-priority="3">Peak power</th>
-                            <th data-priority="4">Efficiency</th>
-                        </tr>
-                    </thead>
-                    <tbody id="history-table-body">
-                        <tr>
-                            <td>2014-11-23</td>
-                            <td>1h 21min</td>
-                            <td>1.2 kWh</td>
-                            <td>122 kg</td>
-                            <td>300 W</td>
-                            <td>56 %</td>
-                        </tr>
-                        <tr>
-                            <td>2014-11-23</td>
-                            <td>1h 21min</td>
-                            <td>1.2 kWh</td>
-                            <td>122 kg</td>
-                            <td>300 W</td>
-                            <td>56 %</td>
-                        </tr>
-                     </tbody>
-                </table>
-                <p>
-                    <center style="color:gray;font-size:0.8em;">
-                        <span id="user-history-records-count">2</span> records
-                    </center>
-                </p>
             </div>
         </div>
+
+        <div data-role="page" id="user_exercise_history_detail">
+            <div data-role="header">
+                <a href="#user_home_page" data-rel="back"
+                    class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all">Back</a>
+                <h1>[Data(e.g. 2014-11-24)]</h1>
+            </div>
+            <div data-role="content">
+                 
+            </div>
+        </div>
+
     </body>
 
 </html>

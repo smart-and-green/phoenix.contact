@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-import bottle,time,datetime,json
+import bottle,time,datetime,json,string
 from datetime import  datetime
 from bottle import run, request, response, post, get, template, route, static_file,\
   Bottle, HTTPResponse, HTTPError,debug,SimpleTemplate,os
@@ -226,7 +226,65 @@ def user_exercise_history():
     return template('tpl/user_exercise_history')
     
 
+@app.route('/getUserMonthExRecord', method = 'POST')
+def getUserMonthExRecord(db):
+    userid = request.POST.get('userid')
+    queryYear = request.POST.get('year')
+    queryMonth = request.POST.get('month')
     
+    ret = {}
+    print userid, queryYear, queryMonth
+    cr = db.cursor()
+    
+    # test whether there are still record not loaded
+    cr.execute(
+        ''' select count(*) from exercise_log 
+            where
+                user_id = %(userid)s and 
+                start_datetime < %(start_datetime)s
+        ''',
+        {
+            "userid": userid,
+            "start_datetime": str(string.atoi(queryYear)) + "-" + str(string.atoi(queryMonth) + 1),
+        }
+    )
+    if (cr.fetchall()[0][0] <= 0):
+        ret["noMoreExRecord"] = True
+    else:
+        ret["noMoreExRecord"] = False
+
+    # query the history of the given month
+    count = cr.execute(
+        ''' select * from exercise_log 
+            where
+                user_id = %(userid)s and
+                EXTRACT(YEAR from start_datetime) = %(year)s and
+                EXTRACT(MONTH from start_datetime) = %(month)s
+            order by start_datetime desc
+        ''',
+        {
+            "userid": userid,
+            "year": string.atoi(queryYear),
+            "month": string.atoi(queryMonth) + 1
+        }
+        # 脚本里月份是从0~11，数据库里月份是1~12，所以从脚本传递到数据库里要+1
+    )
+    ret["count"] = count
+    ret["histories"] = []
+    table = cr.fetchall()
+    for row in table:
+        record = {}
+        record["equipment_id"] = row[1]
+        record["startTime"] = row[2].__str__()
+        record["endTime"] = row[3].__str__()
+        record["energy"] = row[4]
+        record["peakPower"] = 0.0
+        record["efficiency"] = 0.0
+        ret["histories"].append(record)
+    print ret
+    cr.close()
+    return ret
+
 
 
 @app.route('/getUserLast10History', method = 'POST')
