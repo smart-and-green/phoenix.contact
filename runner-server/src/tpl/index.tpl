@@ -273,19 +273,68 @@
                     });
                 }
 
-		function getUserLastMonthExHistory(userid) {
+        		function getUserMonthExRecord(userid, year, month) {
                     $.ajax({
-			url: "getUserLastMonthExHistory",
+			            url: "getUserMonthExRecord",
                         type: "post",
-			data: { userid: userid },
-			datatype: "json",
-			async: true,
-			success: function(result) {
-			    if (result.lastIndex != 0) {
-			    }
-			}
-		    });
-		}
+			            data: { 
+			                userid: userid,
+			                year: year,
+                            month: month
+			            },
+			            datatype: "json",
+			            async: true,
+			            success: function(result) {
+			                if (result.count != 0) {
+				                var recordDividerTemplate = "\
+                        		    <li data-role='list-divider'>\
+                            			<span>[recent-month]</span>\
+			    			            <span class='ui-li-count'>[count]</span>\
+                        		    </li>";
+				                var recordTemplate = "\
+                        		    <li>\
+                              		    <a href='[link]'>\
+                               			    <h2>[exercise-type]</h2>\
+                                		    <p>[start-time] <strong>duration:</strong> [duration]</p>\
+	                        	  	        <p class='ui-li-aside'><strong>[energy]</strong>kJ</p>\
+                            		    </a>\
+                        		    </li>";
+                                var divider = recordDividerTemplate
+                                        .replace("[recent-month]", year + "-" + month)
+                                        .replace("[count]", result.count + "");
+                                var record = "";
+                                for (index = 0; result.histories[index] != null; ++index) {
+                                    var startTime = new Date(result.histories[index].startTime.replace(/\-/g, "/"));
+                                    var endTime = new Date(result.histories[index].endTime.replace(/\-/g, "/"));
+                                    var durationTotalSecond = (endTime - startTime) / 1000;
+                                    var durationSecond = durationTotalSecond % 60;
+                                    var durationMinute = parseInt(durationTotalSecond / 60) % 60;
+                                    var durationHour = parseInt(parseInt(durationTotalSecond / 60) / 60);
+			
+                                    var dateStr = "";
+                                    var dayOfMonth = startTime.getDate();
+                                    if (dayOfMonth == 1 || dayOfMonth == 21 || dayOfMonth == 31) {
+                                       dateStr = dayOfMonth + "st ";
+                                    } else if (dayOfMonth == 2 || dayOfMonth == 22) {
+                                       dateStr = dayOfMonth + "nd ";
+                                    } else if (dayOfMonth == 3 || dayOfMonth == 23) {
+                                       dateStr = dayOfMonth + "rd ";
+                                    } else {
+                                       dateStr = dayOfMonth + "th ";
+                                    }
+				                    record += recordTemplate
+                                            .replace("[link]", "#")
+                                            .replace("[exercise-type]", "bike")
+                                            .replace("[energy]", result.histories[index].energ)
+                                            .replace("[duration]", durationHour + "h " + durationMinute + "m " + durationSecond + "s")
+                                            .replace("[start-time]", dateStr + startTime.toLocaleTimeString());
+                                    recordIndex--;
+                                    $("#user-exercise-record-list").append(divider + record);
+                                }
+                            }    
+			            }
+		            });
+		        }
 
                 function getUserLast10ExHistory(userid) {
                     $.ajax({
@@ -298,24 +347,24 @@
                         async: true,
                         success: function(result) {
                             if (result.lastIndex != 0) {
-				var recordDividerTemplate = "\
-                        		<li data-role='list-divider'>\
+				                var recordDividerTemplate = "\
+                        		    <li data-role='list-divider'>\
                             			<span>[recent-month]</span>\
-			    			<span class='ui-li-count'>[count]</span>\
-                        		</li>";
-				var recordTemplate = "\
-                        		<li>\
+			    			            <span class='ui-li-count'>[count]</span>\
+                        		    </li>";
+				                var recordTemplate = "\
+                        		    <li>\
                               		    <a href='[link]'>\
-                               			<h2>[exercise-type]</h2>\
-                                		<p>[start-time] <strong>duration:</strong> [duration]</p>\
-	                        	  	<p class='ui-li-aside'><strong>[energy]</strong></p>\
+                               			    <h2>[exercise-type]</h2>\
+                                		    <p>[start-time] <strong>duration:</strong> [duration]</p>\
+	                        	  	        <p class='ui-li-aside'><strong>[energy]</strong></p>\
                             		    </a>\
-                        		</li>";
+                        		    </li>";
                                 var recordIndex = result.lastIndex;
-				var thisYear = new Date().getFullYear();
-				var thisMonth = new Date().getMonth();
+				                var thisYear = new Date().getFullYear();
+				                var thisMonth = new Date().getMonth();
 
-				var index = 0;
+				                var index = 0;
                                 for (; result.histories[index] != null; index++) {
                                     var startTime = new Date(result.histories[index].startTime.replace(/\-/g, "/"));
                                     var endTime = new Date(result.histories[index].endTime.replace(/\-/g, "/"));
@@ -324,15 +373,17 @@
                                     var durationMinute = parseInt(durationTotalSecond / 60) % 60;
                                     var durationHour = parseInt(parseInt(durationTotalSecond / 60) / 60);
 				
-				    var divider = recordDividerTemplate.replace("[recent-month]", thisYear + "-" + thisMonth).replace("[count]", "1");
-				    var record = recordTemplate
-						.replace("[link]", "#")
-						.replace("[exercise-type]", "bike")
-						.replace("[energy]", result.histories[index].energy + " kJ")
-						.replace("[duration]", durationHour + "h " + durationMinute + "m " + durationSecond + "s")
-						.replace("[start-time]", startTime.getDate() + "th " +  startTime.toLocaleTimeString());
+				                    var divider = recordDividerTemplate
+                                            .replace("[recent-month]", thisYear + "-" + thisMonth)
+                                            .replace("[count]", "1");
+				                    var record = recordTemplate
+                                            .replace("[link]", "#")
+                                            .replace("[exercise-type]", "bike")
+                                            .replace("[energy]", result.histories[index].energy + " kJ")
+                                            .replace("[duration]", durationHour + "h " + durationMinute + "m " + durationSecond + "s")
+                                            .replace("[start-time]", startTime.getDate() + "th " +  startTime.toLocaleTimeString());
                                     recordIndex--;
-				    $("#user-exercise-record-list").append(divider + record);
+                                    $("#user-exercise-record-list").append(divider + record);
                                 }
                                 $("#user-history-records-count").text(result.lastIndex);
 
@@ -341,7 +392,7 @@
                                 alert("you don't have any exercise records.");
                             }
                         },
-	                error: function() {
+                        error: function() {
                            alert("loading history error!");
                         }
                     });
@@ -367,12 +418,8 @@
                     });
 
                     $("#user-ex-history-btn").click(function() {
-
-                        // 需要通过session获取userid
-                        var userid = window.localStorage.getItem("savedUserid");
-                        alert(userid);
-                	getUserLast10ExHistory(userid);
-                   });
+                        window.location.href = "#user_exercise_history";
+                    });
                 });
 
             </script>
@@ -650,17 +697,121 @@
 
         <div data-role="page" id="user_exercise_history">
             <script type="text/javascript">
-                $(document).on("pagebeforeshow", "#user_exercise_history", function() {
-                    $("#history-table-body tr").unbind();
-                    $("#history-table-body tr").bind({
-                        mouseover: function() {
-                            $(this).css("backgroundColor", "lightGray");
-                        },
-                        mouseout: function() {
-                            $(this).css("backgroundColor", "");
+                var loadedRecord = {
+                    earliestYear: 0,
+                    earliestMonth: 0
+                };
+        		function getUserMonthExRecord(userid, year, month) {
+                    $.ajax({
+			            url: "getUserMonthExRecord",
+                        type: "post",
+			            data: { 
+			                userid: userid,
+			                year: year,
+                            month: month
+			            },
+			            datatype: "json",
+			            async: true,
+			            success: function(result) {
+			                if (result.count != 0) {
+				                var recordDividerTemplate = "\
+                        		    <li data-role='list-divider'>\
+                            			<span>[recent-month]</span>\
+			    			            <span class='ui-li-count'>[count]</span>\
+                        		    </li>";
+				                var recordTemplate = "\
+                        		    <li>\
+                              		    <a href='[link]'>\
+                               			    <h2>[exercise-type]</h2>\
+                                		    <p>[start-time] <strong>duration:</strong> [duration]</p>\
+	                        	  	        <p class='ui-li-aside'><strong>[energy]</strong>kJ</p>\
+                            		    </a>\
+                        		    </li>";
+
+                                // 将最近两个月的标签用this month和last month表示 
+                                var thisMonth = {
+                                    year: new Date().getFullYear(),
+                                    month: new Date().getMonth()
+                                };
+                                var lastMonth = {
+                                    year: thisMonth.year,
+                                    month: thisMonth.month - 1
+                                };
+                                if (lastMonth.month < 0) {
+                                    lastMonth.month = 11;
+                                    lastMonth.year--;
+                                }
+                                var recentMonthLabel = year + "-" + month;
+                                if (year == thisMonth.year && month == thisMonth.month){
+                                    recentMonthLabel = "This month";  
+                                } else if (year == lastMonth.year && month == lastMonth.month) {
+                                    recentMonthLabel = "Last Month";
+                                }
+
+                                var divider = recordDividerTemplate
+                                        .replace("[recent-month]", year + "-" + month)
+                                        .replace("[count]", recentMonthLabel);
+                                var record = "";
+                                for (var index = 0; result.histories[index] != null; ++index) {
+                                    var startTime = new Date(result.histories[index].startTime.replace(/\-/g, "/"));
+                                    var endTime = new Date(result.histories[index].endTime.replace(/\-/g, "/"));
+                                    var durationTotalSecond = (endTime - startTime) / 1000;
+                                    var durationSecond = durationTotalSecond % 60;
+                                    var durationMinute = parseInt(durationTotalSecond / 60) % 60;
+                                    var durationHour = parseInt(parseInt(durationTotalSecond / 60) / 60);
+			
+                                    var dateStr = "";
+                                    var dayOfMonth = startTime.getDate();
+                                    if (dayOfMonth == 1 || dayOfMonth == 21 || dayOfMonth == 31) {
+                                       dateStr = dayOfMonth + "st ";
+                                    } else if (dayOfMonth == 2 || dayOfMonth == 22) {
+                                       dateStr = dayOfMonth + "nd ";
+                                    } else if (dayOfMonth == 3 || dayOfMonth == 23) {
+                                       dateStr = dayOfMonth + "rd ";
+                                    } else {
+                                       dateStr = dayOfMonth + "th ";
+                                    }
+				                    record += recordTemplate
+                                            .replace("[link]", "#")
+                                            .replace("[exercise-type]", "bike")
+                                            .replace("[energy]", result.histories[index].energ)
+                                            .replace("[duration]", durationHour + "h " + durationMinute + "m " + durationSecond + "s")
+                                            .replace("[start-time]", dateStr + startTime.toLocaleTimeString());
+                                    recordIndex--;
+                                    $("#user-exercise-record-list").append(divider + record);
+                                }
+                            } else {
+                                month--;
+                                if (month < 0) {
+                                    month = 11;
+                                    year--;
+                                }
+                                loadedRecord.earliestYear = year;
+                                loadedRecord.earliestMonth = month;  
+                                getUserMonthExRecord(userid, year, month);
+                            }
+			            },
+                        error: function(e) {
+                            alert("no response from server");
                         }
-                    });
+		            });
+		        }
+
+                $(document).on("pagebeforeshow", "#user_exercise_history", function() {
+                    // 先清除历史记录列表中原有的数据，重新从服务器加载
+                    $("#user-exercise-record-list").html(""); 
+                    
+                    // 进入这个页面的时候自动加载这个月的历史记录
+                    // 如果这个月没有记录，会自动加载上个月的，以此类推
+                    // loadedRecord对象中会保存最久以前所加载记录的年份和月份，即列表最下面的记录的月份
+                    var userid = window.localStorage.getItem("savedUserid");
+                    alert(userid);
+                    var thisYear = new Date().getFullYear();
+                    var thisMonth = new Date().getMonth();
+                    getUserMonthExRecord(userid, thisYear, thisMonth); 
+
                 });
+
             </script>
             <div data-role="header">
                 <a href="#user_home_page" data-rel="back"
@@ -673,7 +824,7 @@
 
                         <li data-role="list-divider">
                             <span>[yyyy/MM]</span>
-			    <span class="ui-li-count">[count]</span>
+                            <span class="ui-li-count">[count]</span>
                         </li>
                         <li>
                             <a href="#">
@@ -692,7 +843,7 @@
 
                         <li data-role="list-divider">
                             <span >[yyyy/MM]</span>
-			    <span class="ui-li-count">[count]</span>
+                            <span class="ui-li-count">[count]</span>
                         </li>
                         <li>
                             <a href="#">
@@ -703,11 +854,6 @@
                         </li>
                     </ul>
                 </div>
-                <p>
-                    <center style="color:gray;font-size:0.8em;">
-                        <span id="user-history-records-count">2</span> records
-                    </center>
-                </p>
             </div>
         </div>
 
