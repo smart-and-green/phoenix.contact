@@ -113,6 +113,9 @@
 
                                 // add this statement to refresh the list after loaded.
                                 $("ul").listview("refresh");
+
+                                // remove the no ex record notification
+                                $("#no-record-notification").html("");
                             } else if (loadedRecord.noMoreExRecord == false) {
                                 month--;
                                 if (month < 0) {
@@ -130,7 +133,6 @@
 
                 
                 $(document).ready(function() {
-                    alert("ex page");
 
                     // 先清除历史记录列表中原有的数据，重新从服务器加载
                     $("#user-exercise-record-list").html(""); 
@@ -147,11 +149,13 @@
                     var thisYear = new Date().getFullYear();
                     var thisMonth = new Date().getMonth();
                     addUserMonthExRecord(userid, thisYear, thisMonth); 
+                    $("#add-more-btn").text("touch to add more");
 
                     $("#add-more-btn").click(function() {
                         if (loadedRecord.noMoreExRecord == true) {
                             $(this).text("no more exercise record");
                         } else {
+                            $(this).text("touch to add more");
                             // there are still some record unloaded
                             loadedRecord.earliestMonth--;
                             if (loadedRecord.earliestMonth < 0) {
@@ -163,7 +167,6 @@
                     });
                 });
                 
-
             </script>
             <div data-role="header">
                 <a href="/index#user_home_page" data-rel="back"
@@ -171,42 +174,18 @@
                 <h1>History</h1>
             </div>
             <div data-role="content">
+                <div id="no-record-notification" style="color:gray;text-align:center;">
+                    You don't have any exercise record. 
+                    <button>
+                        <h2>Let's run!</h2>
+                    </button>
+                </div>
+                
                 <div id="user-exercise-history-field">
                     <ul id="user-exercise-record-list" data-role="listview" data-inset="true">
 
-                        <li data-role="list-divider">
-                            <span>[yyyy/MM]</span>
-                            <span class="ui-li-count">[count]</span>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <h2>[running]</h2>
-                                <p>2014/11/23 12:50 duration: 1h 30m</p>
-                            <p class="ui-li-aside">energy:<strong>[energy]</strong></p>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <h2>[running]</h2>
-                                <p>2014/11/23 12:50 duration: 1h 30m</p>
-                            <p class="ui-li-aside">energy:<strong>[energy]</strong></p>
-                            </a>
-                        </li>
-
-                        <li data-role="list-divider">
-                            <span >[yyyy/MM]</span>
-                            <span class="ui-li-count">[count]</span>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <h2>[running]</h2>
-                                <p>2014/11/23 12:50 duration: 1h 30m</p>
-                            <p class="ui-li-aside">energy:<strong>[energy]</strong></p>
-                            </a>
-                        </li>
                     </ul>
                     <div id="add-more-btn" style="padding:1em;color:gray;text-align:center;">
-                        touch to add more
                     </div>
                 </div>
             </div>

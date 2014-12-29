@@ -140,13 +140,29 @@
                     $("#duration-displayer").fadeIn();
                 }
 
+                function uploadExRecord(exerciseData) {
+                    $.ajax({
+                        url: "uploadExRecord",
+                        type: "post",
+                        data: exerciseData,
+                        datatype: "json",
+                        async: true,
+                        success: function(result) {
+                            if (result.success) {
+                                alert("upload ok!");
+                            } else {
+                                alert("upload fail");
+                            }
+                        }
+                    });
+                }
+
                 // 调用了此回调函数表示nfc读取成功
                 // 处理解码后的卡信息，从中读取运动设备信息
                 // 记录运动设备信息和运动量信息，并显示
                 // 同时维护按钮内容的显示
                 function startEx_startTimeInfoProc(code) {
                     console.log(code);
-                    alert(code);
 
                     // 如果qrcode读取成功，处理完信息后将按钮转变成停止功能
                     $("#start-exercise-btn").text("Stop exercising");
@@ -165,7 +181,6 @@
                 }
                 function stopEx_endTimeInfoProc(code) {
                     console.log(code);
-                    alert(code);
 
                     // 如果qrcode读取成功，处理完信息后将按钮转变成停止功能
                     $("#start-exercise-btn").text("Start to exercise");
@@ -179,19 +194,25 @@
                     // 将解码的code打包到exerciseData
                     var startTime = new Date(StartSecStamp * 1000);
                     var endTime = new Date(EndSecStamp * 1000);
+                    var startTimeStr = startTime.getFullYear() + "-" + startTime.getMonth() + "-" + startTime.getDate()
+                            + " " + startTime.getHours() + ":" + startTime.getMinutes() + ":" + startTime.getSeconds();   
+                    var endTimeStr = endTime.getFullYear() + "-" + endTime.getMonth() + "-" + endTime.getDate()
+                            + " " + endTime.getHours() + ":" + endTime.getMinutes() + ":" + endTime.getSeconds();   
+                    
+                    var userid = window.localStorage.getItem("savedUserid");
                     var exerciseData = {
-                        startTime: startTime.toLocaleDateString() + " " + startTime.toLocaleTimeString(),
-                        endTime: endTime.toLocaleDateString() + " " + endTime.toLocaleTimeString(),
+                        userid: userid,
+                        startTime: startTimeStr,
+                        endTime: endTimeStr,
                         energy: 0.12,
                         peakPower: 450.1,
                         efficiency: 0.78,
                         peakCurrent: 12.1,
                         peakVoltage: 45.7,
+                        co2reduced: 123.1,
                         equipmentid: EquipmentId
                     };
-
-                    var userid = window.localStorage.getItem("savedUserid");
-                    uploadExRecord(userid, exerciseData);
+                    uploadExRecord(exerciseData);
 
                     // 上传完后把对应内容显示出来
                     $("#startTime-thisEx").text(startTime.toLocaleTimeString());
@@ -228,10 +249,10 @@
                     var success = function(data) {  
                         alert("card id:\n" + data.cardId);  
                         var sector1str = "";
-                        for (var i = 0; i < 16 * 4; ++i) {
-                            sector1str += data.cardData[i].toString(16);
+                        for (var i = 32; i < 48; ++i) {
+                            sector1str += data.cardData[i].toString(16) + " ";
                         }
-                        alert("block 1:\n" + sector1str);
+                        alert("block 2:\n" + sector1str);
                         fnCallback("feed back data");     
                     };  
                     var error = function(e) {  
@@ -250,30 +271,10 @@
                 }
 
 
-                function uploadExRecord(userid, exerciseData) {
-                    $.ajax({
-                        url: "uploadExRecord",
-                        type: "post",
-                        data: {
-                            userid: userid,
-                            exData: exerciseData
-                        },
-                        datatype: "json",
-                        async: true,
-                        success: function(result) {
-                            if (result["success"]) {
-                                alert("upload ok!");
-                            } else {
-                                alert("upload fail");
-                            }
-                        }
-                    });
-                }
 
                 $(document).ready(function() {
                     $("#signOutBtn").click(signOut);
                     $("#start-exercise-btn").click(function() {
-                        alert($(this).text());
                         if ($(this).text().indexOf("Start") >= 0) {
                             captureAndDecode(startEx_startTimeInfoProc);
                         } else if ($(this).text().indexOf("Stop") >= 0) {
