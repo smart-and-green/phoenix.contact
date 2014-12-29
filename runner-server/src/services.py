@@ -380,12 +380,110 @@ def signup(db):
 
 @app.route('/uploadExRecord', method = 'POST')
 def uploadExRecord(db):
-    userid = request.POST.get('userid')
-    exerciseData = request.POST.get('exerciseData')
-    print "exerciseDate:",exerciseData
-    print "equipmentid:",exerciseDate
+    user_id = request.POST.get('userid')
+    equipment_id = request.POST.get('co2reducded')
+    start_time = request.POST.get('startTime')
+    end_time = request.POST.get('endTime')
+    energy = request.POST.get('energy')
+    peak_power = request.POST.get('peakPower')
+    efficiency = request.POST.get('efficiency')
+    peak_current = request.POST.get('peakCurrent')
+    peak_voltage = request.POST.get('peakVoltage')
+    co2_reduced = request.POST.get('co2reducded')
+    print ("userid:",userid,"startTime:",startTime,"endTime:",endTime,
+      "energy:",energy,"peakPower:",peakPower,"efficiency:",efficiency,
+      "peakCurrent:",peakCurrent ,"peakVoltage:",peakVoltage,"equipmentid:",equipmentid,
+      "co2reducded:",co2reducded)        
     ret = {}
     ret["success"] = True
+    cr = db.cursor()
+    cr.execute('''SELECT DATE(%(start_time)s)''',{"start_time":start_time})
+    start_date = cr.fetchall()
+    start_date = start_date[0][0]
+    print "start_date:",start_date
+    cr.execute('''SELECT DATE(%(end_time)s)''',{"end_time":end_time})
+    end_date = cr.fetchall()
+    end_date = end_date[0][0]
+    print "end_date:",end_date
+    cr.execute('''SELECT DATEDIFF(%(start_date)s,%(end_date)s)''',{"start_date":start_date,"end_date":end_date})
+    diff_date = cr.fetchall()
+    diff_date = diff_date[0][0]
+    print "diff_date:",diff_date
+    if (diff_date>=2):
+        ret["success"] = False
+        return ret
+    elif (diff_date ==1):
+        duration_time = "11:12:10"
+    else :
+        duration_time = "2:23:14"
+    cr.execute('''SELECT YEAR(%(start_time)s)''',{"start_time":start_time})
+    year = cr.fetchall()
+    year = year[0][0]#得到当前的年份
+    print "当前的年份:",year 
+    
+    cr.execute('''SELECT MONTH(%(start_time)s)''',{"start_time":start_time})
+    month = cr.fetchall()
+    month = month[0][0]#得到当前的月份
+    print "当前的月份:",month  
+
+    cr.execute('''SELECT WEEK(%(start_time)s,2)''',{"start_time":start_time})
+    week = cr.fetchall()
+    week = week[0][0]#得到这是今年第几个星期
+    print "第几个星期:",week
+    
+#-----------------将本次运动的数据存储到数据库--------------------------------------------------------------------
+    cr.execute('''SELECT COUNT(*) FROM exercise_information WHERE (user_id=%(user_id)s)''',{"user_id":user_id})
+    num = cr.fetchall()
+    num = num[0][0]
+    print num #该用户之前一共有多少条记录
+    num = num + 1
+    cr.execute('''INSERT INTO exercise_information (user_id,equipment_id,start_time,end_time,duration_time,energy,
+                  peak_power,efficiency,peak_current,peak_voltage,co2_reduced,num) 
+               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''',(user_id,equipment_id,start_time,end_time,duration_time,energy,
+                                                 peak_power,efficiency,peak_current,peak_voltage,co2_reduced,num))
+#----------------------------------------------------------------------------------------------------------
+
+#-----------------记录每个用户每月的数据记录 ----------------------------------------------------------------   
+    cr.execute('''SELECT COUNT(*) FROM month_information WHERE (user_id=%(user_id)s AND year=%(year)s AND month=%(month)s)''',
+                  {"user_id":user_id,"year":year,"month":month})
+    number = cr.fetchall()
+    number = number[0][0]#检查数据库中是否有这个月的记录，1表示有，0表示没有，若没有则创建这个月的记录，有则更新
+    print "检查数据库中是否有这个月的记录:",number
+    if(number == 0):
+        cr.execute('''INSERT INTO month_information (user_id,year,month,month_energy,month_time) VALUES (%s,%s,%s,%s,%s)''',
+                      (user_id,year,month,energy,duration_time))
+        print "生成本月数据记录成功"
+    elif (number == 1):
+        cr.execute('''UPDATE month_information SET month_energy=month_energy+%(energy)s,month_time=month_time+%(time)s WHERE 
+                    (user_id=%(user_id)s AND year=%(year)s AND month=%(month)s) ''',{"energy":energy,"time":duration_time,"user_id":user_id,"year":year,"month":month})
+        print "更新本月数据成功"
+    else:
+        pass
+#-------------------------------------------------------------------------------------------------------
+
+#---------------记录每个用户每星期的数据记录-------------------------------------------------------------------
+    cr.execute('''SELECT COUNT(*) FROM week_information WHERE (user_id=%(user_id)s AND year=%(year)s AND week=%(week)s)''',
+                  {"user_id":user_id,"year":year,"week":week})
+    number = cr.fetchall()
+    number = number[0][0]#检查数据库中是否有这个月的记录，1表示有，0表示没有，若没有则创建这个月的记录，有则更新
+    print "检查数据库中是否有这个星期的记录:",number
+    if(number == 0):
+        cr.execute('''INSERT INTO week_information (user_id,year,week,week_energy,week_time) VALUES (%s,%s,%s,%s,%s)''',
+                      (user_id,year,week,energy,duration_time))
+        print "生成这个星期数据记录成功"
+    elif (number == 1):
+        cr.execute('''UPDATE week_information SET week_energy=week_energy+%(energy)s,week_time=week_time+%(time)s WHERE 
+                    (user_id=%(user_id)s AND year=%(year)s AND week=%(week)s) ''',{"energy":energy,"time":duration_time,"user_id":user_id,"year":year,"week":week})
+        print "更新这个星期数据成功"
+    else:
+        pass
+#-------------------------------------------------------------------------------------------------
+            
+    print "提交成功"
+    return "提交成功了！！~~"
+    cr.close()
+
+    
     return ret
 
 
@@ -394,18 +492,31 @@ def data(db):
     user_id = 'jim'
     equipment_id = 'bike'
     start_time = "2014-12-12 10:10:10"
-    end_time = "2014-12-12 10:11:11"
+    end_time = "2014-12-11 10:11:11"
+    cr = db.cursor()
     cr.execute('''SELECT DATE(%(start_time)s)''',{"start_time":start_time})
     start_date = cr.fetchall()
     start_date = start_date[0][0]
     print "start_date:",start_date
-    cr.execute('''SELECT DATE(%(start_time)s)''',{"start_time":start_time})
+    cr.execute('''SELECT DATE(%(end_time)s)''',{"end_time":end_time})
     end_date = cr.fetchall()
-    end_date = start_date[0][0]
+    end_date = end_date[0][0]
     print "end_date:",end_date
+    cr.execute('''SELECT DATEDIFF(%(start_date)s,%(end_date)s)''',{"start_date":start_date,"end_date":end_date})
+    diff_date = cr.fetchall()
+    diff_date = diff_date[0][0]
+    print "diff_date:",diff_date
+    if (diff_date>=2):
+        ret["success"] = False
+        return ret
+    else:
+        pass
+        
+
+    
     duration_time = "000001"
     energy = 1
-    cr = db.cursor()
+    
     
     cr.execute('''SELECT YEAR(%(start_time)s)''',{"start_time":start_time})
     year = cr.fetchall()
