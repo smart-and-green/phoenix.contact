@@ -381,7 +381,7 @@ def signup(db):
 @app.route('/uploadExRecord', method = 'POST')
 def uploadExRecord(db):
     user_id = request.POST.get('userid')
-    equipment_id = request.POST.get('co2reducded')
+    equipment_id = request.POST.get('equipmentid')
     start_time = request.POST.get('startTime')
     end_time = request.POST.get('endTime')
     energy = request.POST.get('energy')
@@ -389,11 +389,11 @@ def uploadExRecord(db):
     efficiency = request.POST.get('efficiency')
     peak_current = request.POST.get('peakCurrent')
     peak_voltage = request.POST.get('peakVoltage')
-    co2_reduced = request.POST.get('co2reducded')
-    print ("userid:",userid,"startTime:",startTime,"endTime:",endTime,
-      "energy:",energy,"peakPower:",peakPower,"efficiency:",efficiency,
-      "peakCurrent:",peakCurrent ,"peakVoltage:",peakVoltage,"equipmentid:",equipmentid,
-      "co2reducded:",co2reducded)        
+    co2_reduced = request.POST.get('co2reduced')
+    print ("userid:",user_id,"startTime:",start_time,"endTime:",end_time,
+      "energy:",energy,"peakPower:",peak_power,"efficiency:",efficiency,
+      "peakCurrent:",peak_current ,"peakVoltage:",peak_voltage,"equipmentid:",equipment_id,
+      "co2reducded:",co2_reduced)        
     ret = {}
     ret["success"] = True
     cr = db.cursor()
