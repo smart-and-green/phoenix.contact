@@ -382,16 +382,27 @@ def signup(db):
 def uploadExRecord(db):
     userid = request.POST.get('userid')
     exerciseData = request.POST.get('exerciseData')
-    equipmentid = request.POST.get('equipmentid')
-    print exerciseData
-    print equipmentid
+    print "exerciseDate:",exerciseData
+    print "equipmentid:",exerciseDate
+    ret = {}
+    ret["success"] = True
+    return ret
+
 
 @app.route('/data')#上传健身数据到数据库
 def data(db):
     user_id = 'jim'
     equipment_id = 'bike'
     start_time = "2014-12-12 10:10:10"
-    end_time = 20141212101111
+    end_time = "2014-12-12 10:11:11"
+    cr.execute('''SELECT DATE(%(start_time)s)''',{"start_time":start_time})
+    start_date = cr.fetchall()
+    start_date = start_date[0][0]
+    print "start_date:",start_date
+    cr.execute('''SELECT DATE(%(start_time)s)''',{"start_time":start_time})
+    end_date = cr.fetchall()
+    end_date = start_date[0][0]
+    print "end_date:",end_date
     duration_time = "000001"
     energy = 1
     cr = db.cursor()
