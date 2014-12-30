@@ -34,8 +34,6 @@
                         async: true,
                         success: function(result) {
                             if (result["success"] == true) {
-                                window.location.href = "#user_home_page";
-
                                 // 自动记录上次登陆的记录，下次就不用再输入密码了
                                 window.localStorage.setItem("savedUserid", userid);
                                 window.localStorage.setItem("savedPassword", password);
@@ -54,16 +52,23 @@
                                 $("#co2-average").text(userData.average.energy * 10);
                                 $("#energy-rank-average").text(userData.average.globalRank);
 
-                                // 等待服务器数据接口更新
-                                //$("#duration-lastMonth").text(userData.lastMonthSummary.duration);
-                                //$("#energy-lastMonth").text(userData.lastMonthSummary.energy);
-                                //$("#co2-lastMonth").text(userData.lastMonthSummary.energy * 10);
-                                //$("#energy-rank-lastMonth").text(userData.lastMonthSummary.globalRank);
+                                // 如果上个月有记录，则显示出来 
+                                if (userData.lastMonthSummary) {
+                                    $("#duration-lastMonth").text(userData.lastMonthSummary.duration);
+                                    $("#energy-lastMonth").text(userData.lastMonthSummary.energy);
+                                    $("#co2-lastMonth").text(userData.lastMonthSummary.energy * 10);
+                                    $("#energy-rank-lastMonth").text(userData.lastMonthSummary.globalRank);
+                                }
 
-                                //$("#duration-thisMonth").text(userData.thisMonthSummary.duration);
-                                //$("#energy-thisMonth").text(userData.thisMonthSummary.energy);
-                                //$("#co2-thisMonth").text(userData.thisMonthSummary.energy * 10);
-                                //$("#energy-rank-thisMonth").text(userData.thisMonthSummary.globalRank);
+                                // 如果这个月有锻炼记录，则显示出来
+                                if (userData.thisMonthSummary) {
+                                    $("#duration-thisMonth").text(userData.thisMonthSummary.duration);
+                                    $("#energy-thisMonth").text(userData.thisMonthSummary.energy);
+                                    $("#co2-thisMonth").text(userData.thisMonthSummary.energy * 10);
+                                    $("#energy-rank-thisMonth").text(userData.thisMonthSummary.globalRank);
+                                }
+                                
+                                window.location.href = "#user_home_page";
                             } else {
                                 $("#login-result").text("user name or password error.");
                             }
@@ -124,7 +129,7 @@
         <div data-role="page" id="user_home_page">
             <script type="text/javascript">
                 
-                var IntvId;
+                var IntvId = 0;
                 var StartSecStamp = 0;
                 var EndSecStamp = 0;
                 var EquipmentId = "";
@@ -138,7 +143,6 @@
                     $("#exercise-duration-sec").text(parseInt(currentSecCount % 60));
                     $("#exercise-duration-hour").text(parseInt(currentMinCount / 60));
                     $("#exercise-duration-min").text(parseInt(currentMinCount % 60));
-                    $("#duration-displayer").fadeIn();
                 }
 
                 function uploadExRecord(exerciseData) {
@@ -182,12 +186,16 @@
                 }
                 function stopEx_endTimeInfoProc(code) {
                     console.log(code);
+                    if (code == null) {
+                        alert("Your exercise has been cancled");
+                    }
 
                     // 如果qrcode读取成功，处理完信息后将按钮转变成停止功能
                     $("#start-exercise-btn").text("Start to exercise");
 
-                    // 停止计时
-                    window.clearInterval(IntvId); 
+                    // 停止计时，并标记这个定时器id为0，以便其余时候可以检测是否正在锻炼
+                    window.clearInterval(IntvId);
+                    IntvId = 0;  
                     var myDate = new Date();
                     var currentMillis = myDate.getTime();
                     EndSecStamp = currentMillis / 1000;
@@ -279,6 +287,15 @@
 
 
                 function signOut() {
+                    // 自动取消本次锻炼，本次锻炼信息作废
+                    if (IntvId != 0) {
+                        stopEx_endTimeInfoProc(null);
+                    }
+                    
+                    // 隐藏本次锻炼的信息
+                    $("#exercise-achievement-thisTime").slideUp();
+                    $("#exercise-timer").slideUp();
+                    
                     // 登出的时候自动清除保存的帐号和密码
                     window.localStorage.setItem("savedUserid", null);
                     window.localStorage.setItem("savedUserid", null);
@@ -342,39 +359,39 @@
                         </tr>
                         <tr>
                             <td>Last Month</td>
-                            <td><span id="duration-lastMonth">10h 12min</span></td>
-                            <td><span id="energy-lastMonth">100</span> kWh</td>
-                            <td><span id="co2-lastMonth">1.5</span> kg</td>
-                            <td><span id="energy-rank-lastMonth">1</span></td>
+                            <td><span id="duration-lastMonth">0h 0min</span></td>
+                            <td><span id="energy-lastMonth">0</span> kWh</td>
+                            <td><span id="co2-lastMonth">0</span> kg</td>
+                            <td><span id="energy-rank-lastMonth">-</span></td>
                         </tr>
                         <tr>
                             <td>This Month</td>
-                            <td><span id="duration-thisMonth">10h 12min</span></td>
-                            <td><span id="energy-thisMonth">100</span> kWh</td>
-                            <td><span id="co2-thisMonth">1.5</span> kg</td>
-                            <td><span id="energy-rank-thisMonth">1</span></td>
+                            <td><span id="duration-thisMonth">0h 0min</span></td>
+                            <td><span id="energy-thisMonth">0</span> kWh</td>
+                            <td><span id="co2-thisMonth">0</span> kg</td>
+                            <td><span id="energy-rank-thisMonth">-</span></td>
                         </tr>
                      </tbody>
                 </table>
 
+                <div></div>
                 <button id="start-exercise-btn">Start to exercise</button><br>
                 
                 <div id="exercise-timer" style="display:none;">
-                <div id="duration-displayer">
-                    <center>
-                        <span id="exercise-duration-hour" class="em-tips-timer-minhour">0</span><small class="em-tips-timer-minhour">h </small>
-                        <span id="exercise-duration-min" class="em-tips-timer-minhour">0</span><small class="em-tips-timer-minhour">m </small>
-                        <span id="exercise-duration-sec" class="em-tips-timer-sec">0</span><small class="em-tips-timer-sec">s </small>
-                    </center>
+                    <div>
+                        <center>
+                            <span id="exercise-duration-hour" class="em-tips-timer-minhour">0</span><small class="em-tips-timer-minhour">h </small>
+                            <span id="exercise-duration-min" class="em-tips-timer-minhour">0</span><small class="em-tips-timer-minhour">m </small>
+                            <span id="exercise-duration-sec" class="em-tips-timer-sec">0</span><small class="em-tips-timer-sec">s </small>
+                        </center>
+                    </div>
+                    <div id="Exercise-equipment-info" style="margin-top:1em">
+                        <ul data-role="listview">
+                            <li>place: gym 001</li>
+                            <li>equipment type: bike</li>
+                        </ul>
+                    </div>
                 </div>
-                <div id="Exercise-equipment-nfo">
-                    <p>Exercise equipment information:</p>
-                    <ul>
-                        <li>Exercise place: gym 001</li>
-                        <li>equipment type: bike</li>
-                    </ul>
-                </div>
-            </div>
 
             <div id="exercise-achievement-thisTime" style="display:none;">
                 <table data-role="table" data-mode="column" class="ui-responsive table-stroke">
