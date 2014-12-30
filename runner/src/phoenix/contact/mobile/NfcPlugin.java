@@ -119,7 +119,7 @@ public class NfcPlugin extends CordovaPlugin {
 				jsonObj.put("reason", reasonIfError);
 				callbackContext.error(jsonObj);
 			}
-		}
+		} 
 
 		return true;
 	}
@@ -127,10 +127,10 @@ public class NfcPlugin extends CordovaPlugin {
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		Log.d("NfcPlugin", "result back!");
-		result = intent.getIntExtra("result", NfcPlugin.NFC_RESULT_ERROR);
 		if (resultCode == Activity.RESULT_CANCELED) {
 			isCanceled = true;
 		} else if (resultCode == Activity.RESULT_FIRST_USER) {
+			result = intent.getIntExtra("result", NfcPlugin.NFC_RESULT_ERROR);
 			if ((requestCode & READ_REQUEST) != 0) {
 				if (result == NfcPlugin.NFC_RESULT_OK) {
 					cardData = intent.getByteArrayExtra("cardData");
