@@ -78,8 +78,10 @@ def login(db):
                    #     ret["userdata"]["summary"]["globalRank"] = k[3]
                         
                         ret["userdata"]["average"] = {}
-                        average_duration = k[4].__str__()
-                        print "转换成字符串的average时间:",average_duration
+                        average_duration = k[4]
+                        cr.execute('''SELECT TIME_TO_SEC(%(average_duration)s)''',{"average_duration":average_duration})
+                        average_duration = cr.fetchall()[0][0].__str__()
+                        print "转换成秒的average时间:",average_duration
                         ret["userdata"]["average"]["duration"] = average_duration
                         ret["userdata"]["average"]["energy"] = k[5]
                    #     ret["userdata"]["average"]["globalRank"] = k[6]                        
@@ -238,10 +240,10 @@ def getUserMonthExRecord(db):
     
     # test whether there are still record not loaded
     cr.execute(
-        ''' select count(*) from exercise_log 
+        ''' select count(*) from exercise_information
             where
                 user_id = %(userid)s and 
-                start_datetime < %(start_datetime)s
+                start_time < %(start_datetime)s
         ''',
         {
             "userid": userid,
@@ -255,12 +257,12 @@ def getUserMonthExRecord(db):
 
     # query the history of the given month
     count = cr.execute(
-        ''' select * from exercise_log 
+        ''' select * from exercise_information 
             where
                 user_id = %(userid)s and
-                EXTRACT(YEAR from start_datetime) = %(year)s and
-                EXTRACT(MONTH from start_datetime) = %(month)s
-            order by start_datetime desc
+                EXTRACT(YEAR from start_time) = %(year)s and
+                EXTRACT(MONTH from start_time) = %(month)s
+            order by start_time desc
         ''',
         {
             "userid": userid,
@@ -277,9 +279,9 @@ def getUserMonthExRecord(db):
         record["equipment_id"] = row[1]
         record["startTime"] = row[2].__str__()
         record["endTime"] = row[3].__str__()
-        record["energy"] = row[4]
-        record["peakPower"] = 0.0
-        record["efficiency"] = 0.0
+        record["energy"] = row[5]
+        record["peakPower"] = row[6]
+        record["efficiency"] = row[7]
         ret["histories"].append(record)
     print ret
     cr.close()
@@ -380,6 +382,7 @@ def signup(db):
 
 @app.route('/uploadExRecord', method = 'POST')
 def uploadExRecord(db):
+    cr = db.cursor()
     user_id = request.POST.get('userid')
     equipment_id = request.POST.get('equipmentid')
     start_time = request.POST.get('startTime')
@@ -390,13 +393,16 @@ def uploadExRecord(db):
     peak_current = request.POST.get('peakCurrent')
     peak_voltage = request.POST.get('peakVoltage')
     co2_reduced = request.POST.get('co2reduced')
+    cr.execute('''SELECT DATE_ADD(%(start_time)s,INTERVAL 1 MONTH)''',{"start_time":start_time})
+    start_time = cr.fetchall()[0][0].__str__()
+    cr.execute('''SELECT DATE_ADD(%(end_time)s,INTERVAL 1 MONTH)''',{"end_time":end_time})
+    end_time = cr.fetchall()[0][0].__str__()
     print ("userid:",user_id,"startTime:",start_time,"endTime:",end_time,
       "energy:",energy,"peakPower:",peak_power,"efficiency:",efficiency,
       "peakCurrent:",peak_current ,"peakVoltage:",peak_voltage,"equipmentid:",equipment_id,
       "co2reducded:",co2_reduced)        
     ret = {}
     ret["success"] = True
-    cr = db.cursor()
     cr.execute('''SELECT DATE(%(start_time)s)''',{"start_time":start_time})
     start_date = cr.fetchall()
     start_date = start_date[0][0]
@@ -405,17 +411,36 @@ def uploadExRecord(db):
     end_date = cr.fetchall()
     end_date = end_date[0][0]
     print "end_date:",end_date
-    cr.execute('''SELECT DATEDIFF(%(start_date)s,%(end_date)s)''',{"start_date":start_date,"end_date":end_date})
+    cr.execute('''SELECT DATEDIFF(%(end_date)s,%(start_date)s)''',{"start_date":start_date,"end_date":end_date})
     diff_date = cr.fetchall()
     diff_date = diff_date[0][0]
     print "diff_date:",diff_date
     if (diff_date>=2):
+        print "锻炼持续时间超过两天，数据无效"
         ret["success"] = False
         return ret
     elif (diff_date ==1):
-        duration_time = "11:12:10"
+        cr.execute('''SELECT TIME(%(start_time)s)''',{"start_time":start_time})
+        start_time_du = cr.fetchall()[0][0]
+        print "diff_date=1 不加date的start_time:",start_time_du
+        cr.execute('''SELECT TIME(%(end_time)s)''',{"end_time":end_time})
+        end_time_du = cr.fetchall()[0][0]
+        print "diff_date=1 不加date的end_time:",end_time_du
+        cr.execute('''SELECT SUBTIME(%(end_time_du)s,%(start_time_du)s)''',{"start_time_du":start_time_du,"end_time_du":end_time_du})
+        duration_time = cr.fetchall()[0][0]
+        cr.execute('''SELECT ADDTIME(%(duration_time)s,"24:00:00")''',{"duration_time":duration_time})
+        duration_time = cr.fetchall()[0][0]
+        print "diff_date == 1 duration_time:",duration_time
     else :
-        duration_time = "11:12:10"
+        cr.execute('''SELECT TIME(%(start_time)s)''',{"start_time":start_time})
+        start_time_du = cr.fetchall()[0][0]
+        print "diff_date=0 不加date的start_time:",start_time_du
+        cr.execute('''SELECT TIME(%(end_time)s)''',{"end_time":end_time})
+        end_time_du = cr.fetchall()[0][0]
+        print "diff_date=0 不加date的end_time:",end_time_du
+        cr.execute('''SELECT SUBTIME(%(end_time_du)s,%(start_time_du)s)''',{"start_time_du":start_time_du,"end_time_du":end_time_du})
+        duration_time = cr.fetchall()[0][0]
+        print "diff_date == 0 duration_time:",duration_time
     cr.execute('''SELECT YEAR(%(start_time)s)''',{"start_time":start_time})
     year = cr.fetchall()
     year = year[0][0]#得到当前的年份
@@ -441,6 +466,32 @@ def uploadExRecord(db):
                   peak_power,efficiency,peak_current,peak_voltage,co2_reduced,num) 
                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''',(user_id,equipment_id,start_time,end_time,duration_time,energy,
                                                  peak_power,efficiency,peak_current,peak_voltage,co2_reduced,num))
+    cr.execute('''UPDATE total_information SET energy_summary=(energy_summary+%(energy)s),exercise_number=%(num)s WHERE (user_id= %(userid)s)''',
+                  {"energy":energy,"num":num,"userid":user_id})
+    print "更新energy_summary,exercise_number成功"
+    cr.execute('''SELECT energy_summary FROM total_information WHERE user_id= %(user_id)s''',{"user_id":user_id})
+    energy_summary = cr.fetchall()[0][0]
+    print "energy_summary:",energy_summary
+    cr.execute('''UPDATE total_information SET energy_average=
+                     (%(energy_summary)s/%(num)s)
+                      WHERE (user_id= %(user_id)s)''',{"num":num,"energy_summary":energy_summary,"user_id":user_id})
+    print "更新energy_average成功"
+    cr.execute('''SELECT duration_summary FROM total_information WHERE user_id= %(user_id)s''',{"user_id":user_id})
+    duration_summary = cr.fetchall()[0][0].__str__() 
+    print "duration_summary:",duration_summary
+    cr.execute('''UPDATE total_information SET duration_summary=(ADDTIME(%(duration_summary)s,%(duration_time)s))
+                WHERE (user_id=%(user_id)s)''',{"duration_summary":duration_summary,"duration_time":duration_time,"user_id":user_id}) 
+    print "duration_summary更新成功"  
+    cr.execute('''SELECT TIME_TO_SEC(ADDTIME(%(duration_summary)s,%(duration_time)s))''',{"duration_summary":duration_summary,
+                                                                                          "duration_time":duration_time})
+    dur_sec = cr.fetchall()[0][0]#转化为秒的时间
+    print "duration_summary转化为秒:",dur_sec
+    dur_sec_avg = dur_sec/num
+    print "平均每次运动的秒数:",dur_sec_avg
+    cr.execute('''UPDATE total_information SET duration_average=(SEC_TO_TIME(%(dur_sec_avg)s)) 
+                  WHERE user_id=%(user_id)s''',{"dur_sec_avg":dur_sec_avg,"user_id":user_id})
+    print "更新平均运动时间成功"
+
 #----------------------------------------------------------------------------------------------------------
 
 #-----------------记录每个用户每月的数据记录 ----------------------------------------------------------------   
@@ -448,14 +499,14 @@ def uploadExRecord(db):
                   {"user_id":user_id,"year":year,"month":month})
     number = cr.fetchall()
     number = number[0][0]#检查数据库中是否有这个月的记录，1表示有，0表示没有，若没有则创建这个月的记录，有则更新
-    print "检查数据库中是否有这个月的记录:",number
-    if(number == 0):
+    print "检查数据库中是否有这个月的记录 1表示有，0表示没有:",number
+    if(number == 0):#无这个月的记录
         cr.execute('''INSERT INTO month_information (user_id,year,month,month_energy,month_time) VALUES (%s,%s,%s,%s,%s)''',
                       (user_id,year,month,energy,duration_time))
         print "生成本月数据记录成功"
-    elif (number == 1):
+    elif (number == 1):#有这个月的记录
         print "ssssssssssss"
-        cr.execute('''UPDATE month_information SET month_energy=month_energy+%(energy)s,month_time=%(time)s WHERE 
+        cr.execute('''UPDATE month_information SET month_energy=month_energy+%(energy)s,month_time=ADDTIME(month_time,%(time)s) WHERE 
                     (user_id=%(user_id)s AND year=%(year)s AND month=%(month)s) ''',{"energy":energy,"time":duration_time,"user_id":user_id,"year":year,"month":month})
         print "更新本月数据成功"
     else:
@@ -467,13 +518,13 @@ def uploadExRecord(db):
                   {"user_id":user_id,"year":year,"week":week})
     number = cr.fetchall()
     number = number[0][0]#检查数据库中是否有这个月的记录，1表示有，0表示没有，若没有则创建这个月的记录，有则更新
-    print "检查数据库中是否有这个星期的记录:",number
+    print "检查数据库中是否有这个星期的记录 1表示有，0表示没有:",number
     if(number == 0):
         cr.execute('''INSERT INTO week_information (user_id,year,week,week_energy,week_time) VALUES (%s,%s,%s,%s,%s)''',
                       (user_id,year,week,energy,duration_time))
         print "生成这个星期数据记录成功"
     elif (number == 1):
-        cr.execute('''UPDATE week_information SET week_energy=week_energy+%(energy)s,week_time=%(time)s WHERE 
+        cr.execute('''UPDATE week_information SET week_energy=week_energy+%(energy)s,week_time=ADDTIME(week_time,%(time)s) WHERE 
                     (user_id=%(user_id)s AND year=%(year)s AND week=%(week)s) ''',{"energy":energy,"time":duration_time,"user_id":user_id,"year":year,"week":week})
         print "更新这个星期数据成功"
     else:
