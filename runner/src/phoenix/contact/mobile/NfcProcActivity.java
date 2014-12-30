@@ -22,7 +22,7 @@ public class NfcProcActivity extends Activity {
 	private String[][] techLists;
 	
 	private byte[] password;
-	private String command;
+	private int command;
 	private TagWriteIntent tagWriteIntent;
 
 	@Override
@@ -48,7 +48,7 @@ public class NfcProcActivity extends Activity {
 		nfcAdapter = NfcAdapter.getDefaultAdapter(this);
 		if (nfcAdapter == null) {
 			// NFC not available on this device
-			Log.d("nfc push", "nfc unavailable");
+			Log.d("NfcProc", "nfc unavailable");
 
 			Intent result_intent = new Intent();
 			result_intent.putExtra("result", NfcPlugin.NFC_RESULT_ERROR);
@@ -66,10 +66,10 @@ public class NfcProcActivity extends Activity {
 		}
 
 		password = getIntent().getByteArrayExtra("password");
-		command = getIntent().getStringExtra("command");
+		command = getIntent().getIntExtra("command", NfcPlugin.NO_REQUEST);
 		tagWriteIntent = (TagWriteIntent) getIntent().getSerializableExtra("tagWriteIntent");
 		
-		tips.setText(command);
+		//tips.setText(command);
 	}
 
 	@Override
@@ -96,7 +96,7 @@ public class NfcProcActivity extends Activity {
 	}
 
 	private void procNewTagIntent(Intent intent, byte[] password,
-			final String command) {
+			final int command) {
 		// get tag from the intent
 		Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
 
@@ -105,11 +105,12 @@ public class NfcProcActivity extends Activity {
 		try {
 			mfc.connect();
 			Intent result_intent = new Intent();
-			if (command.equalsIgnoreCase("read")) {
+			if ((command & NfcPlugin.READ_REQUEST) != 0) {
 				Log.d("NfcProc", "command=" + command);
 				byte[] cardData = readMifareClassic(mfc, password);
 				result_intent.putExtra("cardData", cardData);
-			} else if (command.equalsIgnoreCase("write")) {
+			} 
+			if ((command & NfcPlugin.WRITE_REQUEST) != 0) {
 				Log.d("NfcProc", "command=" + command);
 				for (TagWriteIntent.WriteStruct ws : tagWriteIntent.writeIntentList) {
 					writeMifareClassicBlock(mfc, password, ws.blockIndex, ws.data);

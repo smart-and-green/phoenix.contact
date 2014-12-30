@@ -6,7 +6,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import phoenix.contact.exercise.ExerciseRecord;
 import android.app.Activity;
 import android.content.Intent;
 import android.util.Log;
@@ -15,8 +14,10 @@ public class NfcPlugin extends CordovaPlugin {
 
 	public final static String READ = "read";
 	public final static String WRITE = "write";
-	public final static int READ_REQUEST = 1;
-	public final static int WRITE_REQUEST = 2;
+	public final static String READ_THEN_WRITE = "readThenWrite";
+	public final static int NO_REQUEST = 0x00;
+	public final static int READ_REQUEST = 0x01;
+	public final static int WRITE_REQUEST = 0x02;
 
 	public final static int NFC_RESULT_ERROR = 1;
 	public final static int NFC_RESULT_OK = 0;
@@ -31,23 +32,6 @@ public class NfcPlugin extends CordovaPlugin {
 	public boolean execute(String action, JSONArray data,
 			CallbackContext callbackContext) throws JSONException {
 		
-		ExerciseRecord er = new ExerciseRecord();
-		er.energy = -1.000067f;
-		er.startTimeStamp.year = 2014;
-		er.startTimeStamp.month = 12;
-		er.startTimeStamp.day = 2;
-		er.startTimeStamp.hour = 15;
-		byte[] b = er.serialize();
-		ExerciseRecord er2 = new ExerciseRecord();
-		er2.unSerialize(b);
-		Log.d("MyTest", "energy=" + er2.energy);
-		Log.d("MyTest", "year=" + er2.startTimeStamp.year);
-		Log.d("MyTest", "month=" + er2.startTimeStamp.month);
-		Log.d("MyTest", "day=" + er2.startTimeStamp.day);
-		Log.d("MyTest", "hour=" + er2.startTimeStamp.hour);
-		Log.d("MyTest", "minute=" + er2.startTimeStamp.minute);
-		Log.d("MyTest", "second=" + er2.startTimeStamp.second);
-
 		this.cordova.setActivityResultCallback(this);
 		Activity activity = this.cordova.getActivity();
 		Intent intent = new Intent(activity, NfcProcActivity.class);
@@ -69,14 +53,14 @@ public class NfcPlugin extends CordovaPlugin {
 		isCanceled = false;
 		result = NFC_RESULT_ERROR;
 		reasonIfError = null;
+		int requestCode = NO_REQUEST;
 
-		switch (action) {
-		case READ:
+		boolean actionMatched = false;
+		if (action.equals(READ) || action.equals(READ_THEN_WRITE)) {
 			Log.d("NfcPlugin", "read a tag");
+			actionMatched = true;
 			intent.putExtra("command", "read");
-			activity.startActivityForResult(intent, READ_REQUEST);
-
-			sleep();
+			requestCode |= READ_REQUEST;
 
 			// FIXME:
 			// when disable the nfc, i can get the tips
@@ -84,32 +68,13 @@ public class NfcPlugin extends CordovaPlugin {
 			// enable, but the user interface
 			// is dead if i touch the screen too quick, because it sleep again!
 			// some problem occurred here. not very often
-
-			if (!isCanceled) {
-				JSONObject jsonObj = new JSONObject();
-				if (result == NfcPlugin.NFC_RESULT_OK) {
-					JSONArray cardDataArray = new JSONArray();
-					for (int i = 0; i < cardData.length; ++i) {
-						// bit-and operation make cardData as an unsigned integer
-						cardDataArray.put(((int) cardData[i]) & 0xFF);
-					}
-					JSONArray cardIdArray = new JSONArray();
-					for (int i = 0; i < 16; ++i) {
-						cardIdArray.put(((int) cardData[i]) & 0xFF);
-					}
-					jsonObj.put("cardData", cardDataArray);
-					jsonObj.put("cardId", cardIdArray);
-					callbackContext.success(jsonObj);
-				} else {
-					jsonObj.put("reason", reasonIfError);
-					callbackContext.error(jsonObj);
-				}
-			}
-			break;
-
-		case WRITE:
+		}
+		if (action.equals(WRITE) || action.equals(READ_THEN_WRITE)) {
 			Log.d("NfcPlugin", "write tag command");
+			actionMatched = true;
 			intent.putExtra("command", "write");
+			requestCode |= WRITE_REQUEST;
+			
 			TagWriteIntent tagWriteIntent = new TagWriteIntent();
 			JSONArray writeIntentArray = data.getJSONArray(1);
 			for (int i = 0; i < writeIntentArray.length(); ++i) {
@@ -124,54 +89,64 @@ public class NfcPlugin extends CordovaPlugin {
 						byteArrayToWrite);
 			}
 			intent.putExtra("tagWriteIntent", tagWriteIntent);
-			activity.startActivityForResult(intent, WRITE_REQUEST);
-			sleep();
-
-			if (!isCanceled) {
-				JSONObject jsonObj = new JSONObject();
-				if (result == NfcPlugin.NFC_RESULT_OK) {
-					callbackContext.success(jsonObj);
-				} else {
-					jsonObj.put("reason", reasonIfError);
-					callbackContext.error(jsonObj);
-				}
-			}
-			break;
-
-		default:
-			// invalid action
+		}
+		if (!actionMatched) {
 			return false;
 		}
+		
+		intent.putExtra("command", requestCode);
+		activity.startActivityForResult(intent, requestCode);
+		
+		// wait for activity result back
+		sleep();
+		
+		if (!isCanceled) {
+			JSONObject jsonObj = new JSONObject();
+			if (result == NfcPlugin.NFC_RESULT_OK) {
+				JSONArray cardDataArray = new JSONArray();
+				for (int i = 0; i < cardData.length; ++i) {
+					// bit-and operation make cardData as an unsigned integer
+					cardDataArray.put(((int) cardData[i]) & 0xFF);
+				}
+				JSONArray cardIdArray = new JSONArray();
+				for (int i = 0; i < 16; ++i) {
+					cardIdArray.put(((int) cardData[i]) & 0xFF);
+				}
+				jsonObj.put("cardData", cardDataArray);
+				jsonObj.put("cardId", cardIdArray);
+				callbackContext.success(jsonObj);
+			} else {
+				jsonObj.put("reason", reasonIfError);
+				callbackContext.error(jsonObj);
+			}
+		}
+
 		return true;
 	}
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		Log.d("NfcPlugin", "result back!");
-		if (requestCode == READ_REQUEST) {
-			if (resultCode == Activity.RESULT_FIRST_USER) {
-				result = intent.getIntExtra("result",
-						NfcPlugin.NFC_RESULT_ERROR);
+		result = intent.getIntExtra("result", NfcPlugin.NFC_RESULT_ERROR);
+		if (resultCode == Activity.RESULT_CANCELED) {
+			isCanceled = true;
+		} else if (resultCode == Activity.RESULT_FIRST_USER) {
+			if ((requestCode & READ_REQUEST) != 0) {
 				if (result == NfcPlugin.NFC_RESULT_OK) {
 					cardData = intent.getByteArrayExtra("cardData");
 				} else {
 					reasonIfError = intent.getStringExtra("reason");
 				}
-			} else if (resultCode == Activity.RESULT_CANCELED) {
-				isCanceled = true;
 			}
-		} else if (requestCode == WRITE_REQUEST) {
-			if (resultCode == Activity.RESULT_FIRST_USER) {
-				result = intent.getIntExtra("result",
-						NfcPlugin.NFC_RESULT_ERROR);
-				if (result == NfcPlugin.NFC_RESULT_OK) {
-
-				} else {
-					reasonIfError = intent.getStringExtra("reason");
+			if ((requestCode & WRITE_REQUEST) != 0) {
+				if (result != NfcPlugin.NFC_RESULT_OK) {
+					// append error information if write error occurred
+					reasonIfError += "\n";
+					reasonIfError += intent.getStringExtra("reason");
 				}
-			} else if (resultCode == Activity.RESULT_CANCELED) {
-				isCanceled = true;
 			}
+		} else {
+			Log.d("NfcPlugin", "invalid result code");
 		}
 		super.onActivityResult(requestCode, resultCode, intent);
 
@@ -196,6 +171,7 @@ public class NfcPlugin extends CordovaPlugin {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private String bytesToHexString(byte[] src) {
 		StringBuilder stringBuilder = new StringBuilder();
 		if (src == null || src.length <= 0) {

@@ -18,10 +18,6 @@ public class MainActivity extends DroidGap {
 	public boolean dispatchKeyEvent(KeyEvent event) {
 		if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
 			moveTaskToBack(false);
-//			Intent intent = new Intent();
-//			intent.setAction("android.intent.action.MAIN");
-//			intent.addCategory("android.intent.category.HOME");
-//			startActivity(intent);
 		}
 		return false;
 	}
