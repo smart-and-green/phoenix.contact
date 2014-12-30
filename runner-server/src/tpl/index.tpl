@@ -128,6 +128,7 @@
                 var StartSecStamp = 0;
                 var EndSecStamp = 0;
                 var EquipmentId = "";
+                var mifareDefaultKey = [0xff, 0xff, 0xff, 0xff, 0xff, 0xff];
 
                 function updateDurationDisp() {
                     var myDate = new Date();
@@ -233,19 +234,7 @@
                     $("#exercise-timer").slideUp();
                 }
 
-                function captureAndDecode(fnCallback) {
-                    // navigator.camera.getPicture(function(image) {
-                    //     qrcode.callback = fnCallback; 
-                    //     qrcode.decode("data:image/jpeg;base64," + image);
-                    // }, function(e) {
-                    //     console.log("camera error because: " + e);
-                    // }, { 
-                    //     quality: 25,
-                    //     destinationType: destinationType.DATA_URL,
-                    //     targetWidth: 640,
-                    //     targetHeight: 480
-                    // }); 
-                    var mifareDefaultKey = [0xff, 0xff, 0xff, 0xff, 0xff, 0xff];
+                function exerciseCommand(command) {
                     var success = function(data) {  
                         alert("card id:\n" + data.cardId);  
                         var sector1str = "";
@@ -253,14 +242,41 @@
                             sector1str += data.cardData[i].toString(16) + " ";
                         }
                         alert("block 2:\n" + sector1str);
-                        fnCallback("feed back data");     
+                        sector1str = "";
+                        for (var i = 48; i < 64; ++i) {
+                            sector1str += data.cardData[i].toString(16) + " ";
+                        }
+                        alert("ctrl block:\n" + sector1str);
+
+                        if (command == "start") {
+                            startEx_startTimeInfoProc("[put exercise info here]");
+                        } else if (command == "stop") {
+                            stopEx_endTimeInfoProc("[put exercise info here]");
+                        }
                     };  
                     var error = function(e) {  
                         alert(e.reason);  
                     };  
-                    window.plugins.nfc.read(success, error, mifareDefaultKey);
                     
+                    var lock = [];
+                    if (command == "start") {
+                        lock = [
+                            {
+                                blockIndex: 4,
+                                data: [0xff, 0xff, 0x01, 0x02]
+                            }
+                        ];
+                    } else {
+                        lock = [
+                            {
+                                blockIndex: 4,
+                                data: [0x00, 0x00, 0x00, 0x00]
+                            }
+                        ];
+                    }
+                    window.plugins.nfc.readThenWrite(success, error, mifareDefaultKey, lock);
                 }
+
 
                 function signOut() {
                     // 登出的时候自动清除保存的帐号和密码
@@ -276,9 +292,9 @@
                     $("#signOutBtn").click(signOut);
                     $("#start-exercise-btn").click(function() {
                         if ($(this).text().indexOf("Start") >= 0) {
-                            captureAndDecode(startEx_startTimeInfoProc);
+                            exerciseCommand("start");
                         } else if ($(this).text().indexOf("Stop") >= 0) {
-                            captureAndDecode(stopEx_endTimeInfoProc);
+                            exerciseCommand("stop");
                         }
 
                         // 刚按开始运动或者结束运动后，按钮会禁用1.5s
@@ -286,7 +302,7 @@
                         $(this).attr("disabled", true);
                         window.setTimeout(function() {
                             $("#start-exercise-btn").removeAttr("disabled");
-                        }, 1500);
+                        }, 1000);
                     });
                 });
 
@@ -344,30 +360,30 @@
                 <button id="start-exercise-btn">Start to exercise</button><br>
                 
                 <div id="exercise-timer" style="display:none;">
-		    <div id="duration-displayer">
-                        <center>
-                            <span id="exercise-duration-hour" class="em-tips-timer-minhour">0</span><small class="em-tips-timer-minhour">h </small>
-                            <span id="exercise-duration-min" class="em-tips-timer-minhour">0</span><small class="em-tips-timer-minhour">m </small>
-                            <span id="exercise-duration-sec" class="em-tips-timer-sec">0</span><small class="em-tips-timer-sec">s </small>
-                        </center>
+                <div id="duration-displayer">
+                    <center>
+                        <span id="exercise-duration-hour" class="em-tips-timer-minhour">0</span><small class="em-tips-timer-minhour">h </small>
+                        <span id="exercise-duration-min" class="em-tips-timer-minhour">0</span><small class="em-tips-timer-minhour">m </small>
+                        <span id="exercise-duration-sec" class="em-tips-timer-sec">0</span><small class="em-tips-timer-sec">s </small>
+                    </center>
+                </div>
+                <div id="Exercise-equipment-nfo">
+                    <p>Exercise equipment information:</p>
+                    <ul>
+                        <li>Exercise place: gym 001</li>
+                        <li>equipment type: bike</li>
+                    </ul>
+                </div>
             </div>
-            <div id="Exercise-equipment-nfo">
-                <p>Exercise equipment information:</p>
-                <ul>
-                    <li>Exercise place: gym 001</li>
-                    <li>equipment type: bike</li>
-                </ul>
-            </div>
-		</div>
 
-                <div id="exercise-achievement-thisTime" style="display:none;">
-                    <table data-role="table" data-mode="column" class="ui-responsive table-stroke">
-                        <thead>
-                            <tr>
-                                <th>This exercise</th>
-                                <th data-priority="1">Achievement</th>
-                            </tr>
-                        </thead>
+            <div id="exercise-achievement-thisTime" style="display:none;">
+                <table data-role="table" data-mode="column" class="ui-responsive table-stroke">
+                    <thead>
+                        <tr>
+                            <th>This exercise</th>
+                            <th data-priority="1">Achievement</th>
+                        </tr>
+                    </thead>
                         <tbody>
                             <tr>
                                 <td>Start time</td>
@@ -566,3 +582,4 @@
     </body>
 
 </html>
+

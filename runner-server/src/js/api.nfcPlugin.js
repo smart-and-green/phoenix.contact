@@ -22,7 +22,13 @@ Nfc.prototype = {
     //  }]
     write: function(success, error, password, blockAndDataList) {
         PhoneGap.exec(success, error, "NfcPlugin", "write", [password, blockAndDataList]);  
-    }
+    },
+
+    // read and write a tag in the same time
+    // if blockAndDataList is null, this method is the same as read
+    readThenWrite: function(success, error, password, blockAndDataList) {
+        PhoneGap.exec(success, error, "NfcPlugin", "readThenWrite", [password, blockAndDataList]);  
+    },
 }; 
 
 PhoneGap.addConstructor(function() {  
