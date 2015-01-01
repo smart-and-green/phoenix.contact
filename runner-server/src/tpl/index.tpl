@@ -221,7 +221,6 @@
                         co2reduced: 123.1,
                         equipmentid: EquipmentId
                     };
-                    alert (startTimeStr);
                     uploadExRecord(exerciseData);
 
                     // 上传完后把对应内容显示出来
