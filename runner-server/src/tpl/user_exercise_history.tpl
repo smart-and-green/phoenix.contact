@@ -116,6 +116,8 @@
 
                                 // remove the no ex record notification
                                 $("#no-record-notification").html("");
+                                $("#add-more-btn").fadeIn();
+
                             } else if (loadedRecord.noMoreExRecord == false) {
                                 month--;
                                 if (month < 0) {
@@ -124,9 +126,16 @@
                                 }
                                 addUserMonthExRecord(userid, year, month);
                             }
+
+                            // update the tips
+                            if (loadedRecord.noMoreExRecord) {
+                                $("#add-more-btn").text("no more exercise record");
+                            } else {
+                                $("#add-more-btn").text("touch to add more");
+                            }
                         },
                         error: function(e) {
-                            alert("no response from server");
+                            alert("you has disconnected with the server!");
                         }
                     });
                 }
@@ -149,13 +158,10 @@
                     var thisYear = new Date().getFullYear();
                     var thisMonth = new Date().getMonth();
                     addUserMonthExRecord(userid, thisYear, thisMonth); 
-                    $("#add-more-btn").text("touch to add more");
 
                     $("#add-more-btn").click(function() {
-                        if (loadedRecord.noMoreExRecord == true) {
-                            $(this).text("no more exercise record");
-                        } else {
-                            $(this).text("touch to add more");
+                        if (!loadedRecord.noMoreExRecord) {
+                            $(this).text("loading...");
                             // there are still some record unloaded
                             loadedRecord.earliestMonth--;
                             if (loadedRecord.earliestMonth < 0) {
@@ -185,7 +191,7 @@
                     <ul id="user-exercise-record-list" data-role="listview" data-inset="true">
 
                     </ul>
-                    <div id="add-more-btn" style="padding:1em;color:gray;text-align:center;">
+                    <div id="add-more-btn" style="display:none;padding:1em;color:gray;text-align:center;">
                     </div>
                 </div>
             </div>
