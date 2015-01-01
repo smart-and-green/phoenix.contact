@@ -203,9 +203,9 @@
                     // 将解码的code打包到exerciseData
                     var startTime = new Date(StartSecStamp * 1000);
                     var endTime = new Date(EndSecStamp * 1000);
-                    var startTimeStr = startTime.getFullYear() + "-" + startTime.getMonth() + "-" + startTime.getDate()
+                    var startTimeStr = startTime.getFullYear() + "-" + (startTime.getMonth() + 1) + "-" + startTime.getDate()
                             + " " + startTime.getHours() + ":" + startTime.getMinutes() + ":" + startTime.getSeconds();   
-                    var endTimeStr = endTime.getFullYear() + "-" + endTime.getMonth() + "-" + endTime.getDate()
+                    var endTimeStr = endTime.getFullYear() + "-" + (endTime.getMonth() + 1) + "-" + endTime.getDate()
                             + " " + endTime.getHours() + ":" + endTime.getMinutes() + ":" + endTime.getSeconds();   
                     
                     var userid = window.localStorage.getItem("savedUserid");
@@ -221,6 +221,7 @@
                         co2reduced: 123.1,
                         equipmentid: EquipmentId
                     };
+                    alert (startTimeStr);
                     uploadExRecord(exerciseData);
 
                     // 上传完后把对应内容显示出来

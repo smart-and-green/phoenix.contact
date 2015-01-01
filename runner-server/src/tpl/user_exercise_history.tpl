@@ -175,8 +175,8 @@
             </div>
             <div data-role="content">
                 <div id="no-record-notification" style="color:gray;text-align:center;">
-                    You don't have any exercise record. 
                     <button>
+                        <span>You don't have any exercise record.</span>
                         <h2>Let's run!</h2>
                     </button>
                 </div>
