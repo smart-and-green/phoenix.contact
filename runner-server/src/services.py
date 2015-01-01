@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-import bottle,time,datetime,json,string
+import bottle,time,datetime,json,string,types
 from datetime import  datetime
 from bottle import run, request, response, post, get, template, route, static_file,\
   Bottle, HTTPResponse, HTTPError,debug,SimpleTemplate,os
@@ -393,10 +393,10 @@ def uploadExRecord(db):
     peak_current = request.POST.get('peakCurrent')
     peak_voltage = request.POST.get('peakVoltage')
     co2_reduced = request.POST.get('co2reduced')
-    cr.execute('''SELECT DATE_ADD(%(start_time)s,INTERVAL 1 MONTH)''',{"start_time":start_time})
-    start_time = cr.fetchall()[0][0].__str__()
-    cr.execute('''SELECT DATE_ADD(%(end_time)s,INTERVAL 1 MONTH)''',{"end_time":end_time})
-    end_time = cr.fetchall()[0][0].__str__()
+#    cr.execute('''SELECT DATE_ADD(%(start_time)s,INTERVAL 1 MONTH)''',{"start_time":start_time})
+#    start_time = cr.fetchall()[0][0].__str__()
+#    cr.execute('''SELECT DATE_ADD(%(end_time)s,INTERVAL 1 MONTH)''',{"end_time":end_time})
+#    end_time = cr.fetchall()[0][0].__str__()
     print ("userid:",user_id,"startTime:",start_time,"endTime:",end_time,
       "energy:",energy,"peakPower:",peak_power,"efficiency:",efficiency,
       "peakCurrent:",peak_current ,"peakVoltage:",peak_voltage,"equipmentid:",equipment_id,
