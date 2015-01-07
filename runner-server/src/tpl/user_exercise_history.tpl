@@ -3,7 +3,9 @@
 	<head>
         <title>runner</title>
         <meta charset="utf-8" />
-        <link rel="stylesheet" type="text/css" href="css/jquery.mobile-1.4.5.min.css" />
+        <link rel="stylesheet" type="text/css" href="css/runner-theme-w.min.css" />
+        <link rel="stylesheet" type="text/css" href="css/jquery.mobile.icons.min.css" />
+        <link rel="stylesheet" type="text/css" href="css/jquery.mobile.structure-1.4.5.css" />
         <link rel="stylesheet" type="text/css" href="css/runner.css" />
         <script type="text/javascript" src="js/jquery-1.8.3.min.js"></script>
         <script type="text/javascript" src="js/jquery.mobile-1.4.5.min.js"></script>   
@@ -11,7 +13,7 @@
 	</head>
 
 	<body>
-		<div data-role="page" id="user_exercise_history" date-ajax="false">
+		<div data-role="page">
             <script type="text/javascript">
                 var loadedRecord = {
                     earliestYear: 0,
@@ -38,6 +40,7 @@
                         },
                         datatype: "json",
                         async: true,
+                        crossDomain: true,
                         success: function(result) {
                             // save the status of loaded record
                             loadedRecord.noMoreExRecord = result.noMoreExRecord;
@@ -54,8 +57,18 @@
                                     <li>\
                                         <a href='[link]'>\
                                             <h2>[exercise-type]</h2>\
-                                            <p>[start-time] <strong>duration:</strong> [duration]</p>\
-                                            <p class='ui-li-aside'><strong>[energy]</strong>kJ</p>\
+                                            <span style='display:none;' id='date-'>[date]</span>\
+                                            <p>\
+                                                <span id='datestr-'> [datestr] </span>\
+                                                <span id='start-time-'>[start-time]</span> \
+                                                <span style='display:none;' id='end-time-'>[end-time]</span>\
+                                                <strong>duration: </strong><span id='duration-'>[duration]</span>\
+                                            </p>\
+                                            <p class='ui-li-aside'><strong><span id='erengy-'>[energy]</span></strong>kJ</p>\
+                                            <span style='display:none;' id='efficiency-'>[efficiency]</span>\
+                                            <span style='display:none;' id='peak-power-'>[peak power]</span>\
+                                            <span style='display:none;' id='peak-voltage-'>[peak voltage]</span>\
+                                            <span style='display:none;' id='peak-current-'>[peak current]</span>\
                                         </a>\
                                     </li>";
 
@@ -82,8 +95,11 @@
                                 var divider = recordDividerTemplate
                                         .replace("[recent-month]", recentMonthLabel)
                                         .replace("[count]", result.count + "");
-                                var record = "";
+                                $("#user-exercise-record-list").append(divider);
+                                
+                                var recordIndex = result.count;
                                 for (var index = 0; result.histories[index] != null; ++index) {
+                                    recordIndex--;
                                     var startTime = new Date(result.histories[index].startTime.replace(/\-/g, "/"));
                                     var endTime = new Date(result.histories[index].endTime.replace(/\-/g, "/"));
                                     var durationTotalSecond = (endTime - startTime) / 1000;
@@ -102,22 +118,61 @@
                                     } else {
                                        dateStr = dayOfMonth + "th ";
                                     }
-                                    record += recordTemplate
-                                            .replace("[link]", "#")
+                                    var record = recordTemplate
+                                            .replace("[link]", "#" + recordIndex)
                                             .replace("[exercise-type]", "bike")
                                             .replace("[energy]", result.histories[index].energy)
                                             .replace("[duration]", durationHour + "h " + durationMinute + "m " + durationSecond + "s")
-                                            .replace("[start-time]", dateStr + startTime.toLocaleTimeString());
+                                            .replace("[datestr]", dateStr)
+                                            .replace("[date]", startTime.toLocaleDateString())
+                                            .replace("[start-time]", startTime.toLocaleTimeString())
+                                            .replace("[end-time]", endTime.toLocaleTimeString())
+                                            .replace("[efficiency]", result.histories[index].efficiency)
+                                            .replace("[peak-power]", result.histories[index].peakPower)
+                                            .replace("[peak-voltage]", result.histories[index].peakVoltage)
+                                            .replace("[peak-current]", result.histories[index].peakCurrent);
+                                    var recordElement = $(record);
+                                    recordElement.click(function() { 
+                                        var efficiency = $(this).find("#efficiency-").text();
+                                        var peakPower = $(this).find("#peak-power-").text();
+                                        var peakVoltage = $(this).find("#peak-voltage-").text();
+                                        var peakCurrent = $(this).find("#peak-current-").text();
+                                        var date = $(this).find("#date-").text();
+                                        var startTime = $(this).find("#start-time-").text();
+                                        var endTime = $(this).find("#end-time-").text();
+                                        var duration = $(this).find("#duration-").text();
+                                        var energy = $(this).find("#erengy-").text();
+                                        var co2reduced = parseFloat(energy) * 2;
+                                        $("#record-detail-title").text(date);
+                                        $("#record-detail-efficiency").text(efficiency);
+                                        $("#record-detail-peak-power").text(peakPower);
+                                        $("#record-detail-peak-voltage").text(peakVoltage);
+                                        $("#record-detail-peak-current").text(peakCurrent);
+                                        $("#record-detail-startTime").text(startTime);
+                                        $("#record-detail-endTime").text(endTime);
+                                        $("#record-detail-duration").text(duration);
+                                        $("#record-detail-energy").text(energy);
+                                        $("#record-detail-co2reduced").text(co2reduced);
+
+                                        $.mobile.changePage("user_exercise_history#detail_page", "slideUp");
+                                    });
+                                    var newAppended = $("#user-exercise-record-list").append(recordElement);
                                 }
-                                $("#user-exercise-record-list").append(divider + record);
 
                                 // add this statement to refresh the list after loaded.
                                 $("ul").listview("refresh");
 
                                 // remove the no ex record notification
-                                $("#no-record-notification").html("");
+                                $("#first-enter-loading-notification").slideUp();
                                 $("#add-more-btn").fadeIn();
-
+                                $("#record-list-tips").fadeIn();
+                            
+                                // update the tips
+                                if (loadedRecord.noMoreExRecord) {
+                                    $("#add-more-btn").text("no more exercise record");
+                                } else {
+                                    $("#add-more-btn").text("touch to add more");
+                                }
                             } else if (loadedRecord.noMoreExRecord == false) {
                                 month--;
                                 if (month < 0) {
@@ -125,13 +180,12 @@
                                     year--;
                                 }
                                 addUserMonthExRecord(userid, year, month);
-                            }
-
-                            // update the tips
-                            if (loadedRecord.noMoreExRecord) {
-                                $("#add-more-btn").text("no more exercise record");
                             } else {
-                                $("#add-more-btn").text("touch to add more");
+                                $("#add-more-btn").text("no more exercise record");
+                                if (loadedRecord.count == 0) {
+                                    $("#no-record-notification").fadeIn();
+                                    $("#first-enter-loading-notification").fadeOut();
+                                }
                             }
                         },
                         error: function(e) {
@@ -174,38 +228,76 @@
                 });
                 
             </script>
-            <div data-role="header">
-                <a href="/index#user_home_page" data-rel="back"
-                    class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all">Back</a>
+            <div data-role="header" class="ui-bar-w" data-position="fixed" data-tap-toggle="false">
+                <a href="#" data-rel="back" class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all">Back</a>
                 <h1>History</h1>
             </div>
             <div data-role="content">
-                <div id="no-record-notification" style="color:gray;text-align:center;">
+                <div id="first-enter-loading-notification" style="color:gray;text-align:center;">
+                    Loading...
+                </div>
+
+                <div id="no-record-notification" style="display:none;color:gray;text-align:center;">
                     <button>
                         <span>You don't have any exercise record.</span>
                         <h2>Let's run!</h2>
                     </button>
                 </div>
                 
-                <div id="user-exercise-history-field">
-                    <ul id="user-exercise-record-list" data-role="listview" data-inset="true">
-
+                <div id="user-exercise-history-field" style="margin-top:1em;">
+                    <p id="record-list-tips" style="margin-bottom:2em;display:none;color:gray;font-size:0.7em;">
+                        The exercise records are listed fallowing. You can press to view the detail information of each record.
+                    </p>
+                    <ul id="user-exercise-record-list" data-role="listview" data-inset="false">
                     </ul>
-                    <div id="add-more-btn" style="display:none;padding:1em;color:gray;text-align:center;">
+                    <div id="add-more-btn" style="display:none;padding:3em;color:gray;text-align:center;">
                     </div>
                 </div>
             </div>
         </div>
 
-        <div data-role="page" id="user_exercise_history_detail">
+        <div data-role="page" id="detail_page">
             <div data-role="header">
-                <a href="#user_home_page" data-rel="back"
+                <a href="#" data-rel="back"
                     class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all">Back</a>
-                <h1>[Data(e.g. 2014-11-24)]</h1>
+                <h1 id="record-detail-title">[Data(e.g. 2014-11-24)]</h1>
             </div>
             <div data-role="content">
-                 
+                
+                <div data-role="collapsibleset"> 
+                    <div data-role="collapsible" data-inset="false" data-collapsed="false">
+                        <h3>General</h3>
+                        <ul data-role="listview" data-inset="false">
+                            <li>[logo] <span id="record-detail-startTime">[Start time]</span> ~ <span id="record-detail-endTime">[End Time]</span></li>
+                            <li>[logo] <span id="record-detail-duration">Duration</span></li>
+                            <li>[logo] <span id="record-detail-energy">Energy consumption</span></li>
+                            <li>[logo] <span id="record-detail-co2reduced">?</span> kg CO<small>2</small> redeced</li>
+                        </ul>        
+                    </div> 
+                    <div data-role="collapsible" data-inset="false"> 
+                        <h3>Expert</h3>
+                        <ul data-role="listview" data-inset="false">
+                            <li>[logo] <span id="record-detail-efficiency">Efficiency</span></li>
+                            <li>[logo] <span id="record-detail-peak-power">Peak power</span></li>
+                            <li>[logo] <span id="record-detail-peak-voltage">Peak current</span></li>
+                            <li>[logo] <span id="record-detail-peak-current">Peak voltage</span></li>
+                        </ul>        
+                    </div> 
+                </div>
+
+                <div data-role="collapsible" data-inset="false" data-collapsed="false">
+                    <h3>Exercise place</h3>
+                    <ul data-role="listview" data-inset="false">
+                        <li><span id="record-detail0-fitness-equipment-type">[equipment type]</span></li>
+                        <li>
+                            <span id="record-detail-fitness-center-name">[fitness center name]</span><br>
+                            <small id="record-detail-fitness-center-addr">[fitness center address]</small>
+                        </li>
+                        <li><span id="record-detail-fitness-equipment-No">[fitness equipment No.]</span></li>
+                    </ul>        
+                </div> 
             </div>
+
         </div>
 
     </body>

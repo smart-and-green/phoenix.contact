@@ -22,3 +22,10 @@
     color: blue;
 }
 
+.ui-bar-w {
+    border: 1px solid #0F0F0F;
+    background: gray;
+    color: #0A0A0A;
+    font-weight: bold;
+}
+

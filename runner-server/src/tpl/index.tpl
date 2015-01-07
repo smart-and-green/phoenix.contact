@@ -3,7 +3,9 @@
     <head>
         <title>runner</title>
         <meta charset="utf-8" />
-        <link rel="stylesheet" type="text/css" href="css/jquery.mobile-1.4.5.min.css" />
+        <link rel="stylesheet" type="text/css" href="css/runner-theme-w.css" />
+        <link rel="stylesheet" type="text/css" href="css/jquery.mobile.icons.min.css" />
+        <link rel="stylesheet" type="text/css" href="css/jquery.mobile.structure-1.4.5.css" />
         <link rel="stylesheet" type="text/css" href="css/runner.css" />
         <script type="text/javascript" src="js/jquery-1.8.3.min.js"></script>
         <script type="text/javascript" src="js/jquery.mobile-1.4.5.min.js"></script>
@@ -32,6 +34,7 @@
                         },
                         datatype: "json",
                         async: true,
+                        crossDomain: true,
                         success: function(result) {
                             if (result["success"] == true) {
                                 // 自动记录上次登陆的记录，下次就不用再输入密码了
@@ -126,7 +129,7 @@
             </div>
         </div>
 
-        <div data-role="page" id="user_home_page">
+        <div data-role="page" id="user_home_page" data-position="fixed" data-tap-toggle="false">
             <script type="text/javascript">
                 
                 var IntvId = 0;
@@ -152,6 +155,7 @@
                         data: exerciseData,
                         datatype: "json",
                         async: true,
+                        crossDomain: true,
                         success: function(result) {
                             if (result.success) {
                                 alert("upload ok!");
@@ -328,7 +332,7 @@
                 <a href="#login" id="signOutBtn"
                     class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all">Sign out</a>
                 <h1 id="userNameHead">[name]</h1>
-                <a href="/user_exercise_history" id="user-ex-history-btn"
+                <a href="user_exercise_history" data-ajax="false" id="user-ex-history-btn"
                     class="ui-btn-right ui-btn ui-btn-inline ui-mini ui-corner-all">History</a>
             </div>
             <div data-role="content">
@@ -461,6 +465,7 @@
                             },
                             datatype: "json",
                             async: true,
+                            crossDomain: true,
                             success: function(result) {
                                 if (result["exist"]) {
                                     if_exist();
@@ -472,24 +477,26 @@
                     }
                 }
 
-                function submitSignUpInfo(userid, password, userName, handleError) {
+                function submitSignUpInfo(userid, password, mobile, address, userName, handleError) {
                     $.ajax({
                         url: "signup",
                         type: "post",
                         data: {
                             userid: userid,
                             password: password,
-                            userName: userName
+                            userName: userName,
+                            mobile: mobile,
+                            address: address
                         },
                         datatype: "json",
                         async: true,
-                        success: function(result) {
-                            if (result["success"] == true) {
-                                // 注册成功后直接登陆
-                                loginSubmit(userid, password);
-                            } else {
-                                handleError(result["reason"]);
-                            }
+                        crossDomain: true,
+                    }).then(function(result) {
+                        if (result.success) {
+                            // 注册成功后直接登陆
+                            loginSubmit(userid, password);
+                        } else {
+                            handleError(result.reason);
                         }
                     });
                 }
@@ -500,6 +507,8 @@
                         var password = $("#signup-password").val();
                         var password_re = $("#signup-password-repeat").val();
                         var name = $("#signup-user-name").val();
+                        var mobile = $("#signup-user-mobile").val();
+                        var address = $("#signup-user-address").val();
 
                         var check_ok = true;
 
@@ -535,7 +544,7 @@
                         }
 
                         if (check_ok) {
-                            submitSignUpInfo(userid, password, name, function(reason) {
+                            submitSignUpInfo(userid, password, name, mobile, address, function(reason) {
                                 // handle the error reason
                                 if (reason == 1) {
                                     $("#signup-result").text("user name exist, please change another.");
@@ -590,7 +599,16 @@
                     <input id="signup-password" type="password" data-clear-btn="true" placeholder="Password" />
                     <input id="signup-password-repeat" type="password" data-clear-btn="true" placeholder="Password repeat" />
                     <p id="signup-password-tip" style="display:none;color:red;" class="tips-text"></p>
+                    
+                    <p style="margin-top:3em;background-color:#FFFACD;font-size:0.7em;color:gray;">
+                        The fallowing information are only used for finding the personal password back if the password is missed. 
+                        We guarantee that all the personal information are under highly confidential.
+                    </p>
                     <input id="signup-user-name" type="text" data-clear-btn="true" placeholder="name or nick name" />
+                    <input id="signup-user-mobile" type="text" data-clear-btn="true" placeholder="mobile phone number" />
+                    <input id="signup-user-email" type="text" data-clear-btn="true" placeholder="e-mail" />
+                    
+                    <input id="signup-user-address" type="text" data-clear-btn="true" placeholder="the place you live in" />
                     <p id="signup-result" style="color:red;" class="tips-text"></p>
                 </form>
             </div>
