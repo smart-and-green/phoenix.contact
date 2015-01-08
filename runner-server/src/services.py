@@ -27,6 +27,14 @@ def server_js(path):
 def server_css(path):
     return static_file(path, root='css')
 
+@app.route('/css/images/<path>')
+def server_img_gif(path):
+    return static_file(path, root='css/images/')
+
+@app.route('/css/images/icons-png/<path>')
+def server_img_png(path):
+    return static_file(path, root='css/images/icons-png/')
+
 @app.route('/tpl/<path>')
 def server_tpl(path):
     return static_file(path, root='tpl')
