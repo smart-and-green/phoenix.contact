@@ -210,7 +210,7 @@
                     IntvId = window.setInterval(updateDurationDisp, 1000);
 
                     // 从code中读出EquipmentId
-                    EquipmentId = "bike001";
+                    EquipmentId = "X000";
                     
                     // display the dashboard
                     $("#exercise-achievement-thisTime").slideUp();
