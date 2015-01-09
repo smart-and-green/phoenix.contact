@@ -38,6 +38,10 @@ def server_img_png(path):
 @app.route('/tpl/<path>')
 def server_tpl(path):
     return static_file(path, root='tpl')
+
+@app.route('/logo/<path>')
+def server_logo(path):
+    return static_file(path, root='logo')
 #---------------------------------------------
 
 mysql = MySQLPlugin(dbfile='phoenix')
@@ -50,6 +54,9 @@ def index():
 
 @app.route('/login', method = 'POST')
 def login(db):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Origin, Accept, Content-Type, X-Requested-With, X-CSRF-Token'
     userid = request.POST.get('userid')
     password = request.POST.get('password')
     ret = {}
@@ -78,9 +85,14 @@ def login(db):
                     for k in total_information:                                                                    
                         ret["userdata"] = {}
                         ret["userdata"]["name"] = nickname
-                        ret["userdata"]["summary"] = {}                        
+                        ret["userdata"]["summary"] = {}
+                        ret["userdata"]["thisMonthSummary"] = {} 
+                        ret["userdata"]["lastMonthSummary"] = {}                       
                         summary_duration = k[1].__str__()
                         print "转换成字符串的summary时间:",summary_duration  #json格式不能直接传time格式
+                        cr.execute('''SELECT TIME_TO_SEC(%(summary_duration)s)''',{"summary_duration":summary_duration})
+                        summary_duration = cr.fetchall()[0][0]
+                        print "转换成秒的summary_duration:",summary_duration
                         ret["userdata"]["summary"]["duration"] = summary_duration
                         ret["userdata"]["summary"]["energy"] = k[2]
                    #     ret["userdata"]["summary"]["globalRank"] = k[3]
@@ -105,8 +117,10 @@ def login(db):
                     average_rank=cr.fetchall()
                     average_rank = average_rank[0][0] + 1
                     ret["userdata"]["average"]["globalRank"] = average_rank
-                        
-                    now_time = "2015-11-15 10:12:56"
+                    
+                    ISOTIMEFORMAT='%Y-%m-%d %X'   
+                    now_time = time.strftime(ISOTIMEFORMAT,time.localtime(time.time()))
+                    print "now_time",now_time #得到当前的时间
                     cr.execute('''SELECT YEAR(%(now_time)s)''',{"now_time":now_time})
                     year = cr.fetchall()
                     year = year[0][0]#得到当前的年份
@@ -126,26 +140,65 @@ def login(db):
                     
     
                     
-#---------------------------本月目前的排名---------------------------------------------------------------------------
-                    cr.execute('''SELECT month_energy FROM month_information WHERE(user_id=%(user_id)s AND year=%(year)s AND month=%(month)s)''',
+#---------------------------本月目前产生的能量和排名，锻炼时间---------------------------------------------------------------------------
+                    cr.execute('''SELECT month_energy,month_time FROM month_information WHERE(user_id=%(user_id)s AND year=%(year)s AND month=%(month)s)''',
                                 {"user_id":userid,"year":year,"month":month})
-                    month_energy = cr.fetchall()
-                    if (month_energy):  #本月有产生能量    
-                        print "能量元组",month_energy
-                        month_energy = month_energy[0][0]
-                        print "本月产生的能量:",month_energy             
+                    this_mon_inf = cr.fetchall()
+                    print "该月产生的能量和时间",this_mon_inf
+                    if (this_mon_inf):
+                        this_mon_energy = this_mon_inf[0][0]
+                        this_mon_time = this_mon_inf[0][1]
+                        print "this_mon_energy:",this_mon_energy,"this_mon_time:",this_mon_time
+                        cr.execute('''SELECT TIME_TO_SEC(%(this_mon_dur)s)''',{"this_mon_dur":this_mon_time})
+                        this_mon_time = cr.fetchall()[0][0]
+                        print "转换成秒的本月锻炼时间:",this_mon_time  
+                        ret["userdata"]["thisMonthSummary"]["duration"] = this_mon_time 
+                        ret["userdata"]["thisMonthSummary"]["energy"] = this_mon_energy       
                         cr.execute('''SELECT COUNT(*) FROM month_information WHERE (month_energy>%(month_energy)s AND year=%(year)s AND month=%(month)s) ''',
-                                   {"month_energy":month_energy,"year":year,"month":month})
-                        month_rank = cr.fetchall()
-                        month_rank = month_rank[0][0]+1 
-                        print "本月目前排名:",month_rank 
-                    else:     #本月无产生能量
-                        cr.execute('''SELECT COUNT(*) FROM month_information WHERE (month_energy>0 AND year=%(year)s AND month=%(month)s) ''',
-                                   {"year":year,"month":month})
-                        month_rank = cr.fetchall()
-                        month_rank = month_rank[0][0]+1  
-                        print "本月没有锻炼目前排名:",month_rank 
+                                   {"month_energy":this_mon_energy,"year":year,"month":month})
+                        this_mon_rank = cr.fetchall()
+                        this_mon_rank = this_mon_rank[0][0]+1 
+                        print "本月目前排名:",this_mon_rank 
+                        ret["userdata"]["thisMonthSummary"]["globalRank"] = this_mon_rank 
+                    else:
+                        print "本月没有锻炼信息"
+                        ret["userdata"]["thisMonthSummary"]["duration"] = 0
+                        ret["userdata"]["thisMonthSummary"]["energy"] = 0
+                        ret["userdata"]["thisMonthSummary"]["globalRank"] = "-" 
 #-------------------------------------------------------------------------------------------------------                 
+
+#---------------------------上个月目前产生的能量和排名，锻炼时间---------------------------------------------------------------------------
+                    if (month != 1):
+                        month = month-1
+                    else:
+                        month=12
+                    print "上个月的月份",month
+                    cr.execute('''SELECT month_energy,month_time FROM month_information WHERE(user_id=%(user_id)s AND year=%(year)s AND month=%(month)s)''',
+                                {"user_id":userid,"year":year,"month":month})
+                    last_mon_inf = cr.fetchall()
+                    print "上月产生的能量和时间",last_mon_inf
+                    if (last_mon_inf):
+                        last_mon_energy = last_mon_inf[0][0]
+                        last_mon_time = last_mon_inf[0][1]
+                        print "last_mon_energy:",last_mon_energy,"last_mon_time:",last_mon_time
+                        cr.execute('''SELECT TIME_TO_SEC(%(this_mon_dur)s)''',{"this_mon_dur":last_mon_time})
+                        last_mon_time = cr.fetchall()[0][0]
+                        print "转换成秒的上月锻炼时间:",last_mon_time  
+                        ret["userdata"]["lastMonthSummary"]["duration"] = last_mon_time 
+                        ret["userdata"]["lastMonthSummary"]["energy"] = last_mon_energy         
+                        cr.execute('''SELECT COUNT(*) FROM month_information WHERE (month_energy>%(month_energy)s AND year=%(year)s AND month=%(month)s) ''',
+                                   {"month_energy":last_mon_energy,"year":year,"month":month})
+                        last_mon_rank = cr.fetchall()
+                        last_mon_rank = last_mon_rank[0][0]+1 
+                        print "上月排名:",last_mon_rank 
+                        ret["userdata"]["lastMonthSummary"]["globalRank"] = last_mon_rank 
+                    else:
+                        print "上月没有锻炼信息"
+                        ret["userdata"]["lastMonthSummary"]["duration"] = 0
+                        ret["userdata"]["lastMonthSummary"]["energy"] = 0
+                        ret["userdata"]["lastMonthSummary"]["globalRank"] = "-" 
+                        
+#-------------------------------------------------------------------------------------------------------  
 
 #-----------------------本星期目前的排名-------------------------------------------------------------------
                     cr.execute('''SELECT week_energy FROM week_information WHERE(user_id=%(user_id)s AND year=%(year)s AND week=%(week)s)''',
@@ -238,6 +291,9 @@ def user_exercise_history():
 
 @app.route('/getUserMonthExRecord', method = 'POST')
 def getUserMonthExRecord(db):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Origin, Accept, Content-Type, X-Requested-With, X-CSRF-Token'
     userid = request.POST.get('userid')
     queryYear = request.POST.get('year')
     queryMonth = request.POST.get('month')
@@ -284,7 +340,22 @@ def getUserMonthExRecord(db):
     table = cr.fetchall()
     for row in table:
         record = {}
+        record["exEquipment"] = {}
         record["equipment_id"] = row[1]
+        cr.execute('''SELECT * FROM equipment_information WHERE(equ_id=%(equ_id)s)''',
+                                    {"equ_id":record["equipment_id"]})
+        equipment_inf = cr.fetchall()[0]
+        print "equipment_inf:",equipment_inf
+        record["exEquipment"]["equipment_id"] = equipment_inf[0]
+        exercise_area_id = equipment_inf[1]
+        record["exEquipment"]["type"] = equipment_inf[2]
+        record["exEquipment"]["name"] = equipment_inf[3]
+        cr.execute('''SELECT * FROM exercise_area_information WHERE(exercise_area_id=%(exercise_area_id)s)''',
+                                    {"exercise_area_id":exercise_area_id})
+        exercise_area = cr.fetchall()[0]
+        print "exercise_area:",exercise_area
+        record["exEquipment"]["fitnessCenterName"] = exercise_area[1]
+        record["exEquipment"]["fitnessCenterAddress"] = exercise_area[2]
         record["startTime"] = row[2].__str__()
         record["endTime"] = row[3].__str__()
         record["energy"] = row[5]
@@ -299,6 +370,9 @@ def getUserMonthExRecord(db):
 
 @app.route('/getUserLast10History', method = 'POST')
 def getUserLast10History(db):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Origin, Accept, Content-Type, X-Requested-With, X-CSRF-Token'
     userid = request.POST.get('userid')
     cr=db.cursor()#新建游标
     cr.execute('''SELECT COUNT(*) FROM exercise_information WHERE (user_id=%(user_id)s)''',{"user_id":userid})
@@ -337,6 +411,9 @@ def getUserLast10History(db):
     
 @app.route('/checkUserid', method = 'POST')
 def checkuserid(db):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Origin, Accept, Content-Type, X-Requested-With, X-CSRF-Token'
     userid = request.POST.get('userid')
     ret = {}
     ret["exist"] = False
@@ -353,6 +430,9 @@ def checkuserid(db):
 
 @app.route('/signup', method = 'POST')
 def signup(db):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Origin, Accept, Content-Type, X-Requested-With, X-CSRF-Token'
     userid = request.POST.get('userid')
     password = request.POST.get('password')
     username = request.POST.get('userName')
@@ -390,6 +470,9 @@ def signup(db):
 
 @app.route('/uploadExRecord', method = 'POST')
 def uploadExRecord(db):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Origin, Accept, Content-Type, X-Requested-With, X-CSRF-Token'
     cr = db.cursor()
     user_id = request.POST.get('userid')
     equipment_id = request.POST.get('equipmentid')
