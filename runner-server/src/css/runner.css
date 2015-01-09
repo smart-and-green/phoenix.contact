@@ -59,6 +59,18 @@
     background-repeat: no-repeat;
 }
 
+.logo-current {
+    background-image: url('../logo/logo-current.png'); 
+    background-size: 10% 10%;
+    background-repeat: no-repeat;
+}
+
+.logo-voltage {
+    background-image: url('../logo/logo-voltage.png'); 
+    background-size: 10% 10%;
+    background-repeat: no-repeat;
+}
+
 .logo-efficiency {
     background-image: url('../logo/logo-efficiency.png'); 
     background-size: 10% 10%;
@@ -75,6 +87,11 @@
     background-image: url('../logo/logo-back.png'); 
     background-size: 10% 10%;
     background-repeat: no-repeat;
+    
+    /* to avoid blocking the inputs  */
+    background-position: 270px 270px;
+    left: -270px;
+    top: -270px;
 }
 
 .list-item-value {

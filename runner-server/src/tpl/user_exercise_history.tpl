@@ -228,8 +228,8 @@
                 });
                 
             </script>
-            <div data-role="header" class="ui-bar-w" data-position="fixed" data-tap-toggle="false">
-                <a href="#" data-rel="back" class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all">Back</a>
+            <div data-role="header" data-position="fixed" data-tap-toggle="false">
+                <div style="margin:0.35em;" class="logo-back logo-300px" onclick="window.history.back();" ></div>
                 <h1>History</h1>
             </div>
             <div data-role="content">
@@ -257,33 +257,68 @@
         </div>
 
         <div data-role="page" id="detail_page">
-            <div data-role="header">
-                <a href="#" data-rel="back"
-                    class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all">Back</a>
+            <div data-role="header" data-position="fixed" data-tap-toggle="false" >
+                <div style="margin:0.35em;" class="logo-back logo-300px" onclick="window.history.back();" ></div>
                 <h1 id="record-detail-title">[Data(e.g. 2014-11-24)]</h1>
             </div>
             <div data-role="content">
                 
-                <div data-role="collapsibleset"> 
-                    <div data-role="collapsible" data-inset="false" data-collapsed="false">
-                        <h3>General</h3>
-                        <ul data-role="listview" data-inset="false">
-                            <li>[logo] <span id="record-detail-startTime">[Start time]</span> ~ <span id="record-detail-endTime">[End Time]</span></li>
-                            <li>[logo] <span id="record-detail-duration">Duration</span></li>
-                            <li>[logo] <span id="record-detail-energy">Energy consumption</span></li>
-                            <li>[logo] <span id="record-detail-co2reduced">?</span> kg CO<small>2</small> redeced</li>
-                        </ul>        
-                    </div> 
-                    <div data-role="collapsible" data-inset="false"> 
-                        <h3>Expert</h3>
-                        <ul data-role="listview" data-inset="false">
-                            <li>[logo] <span id="record-detail-efficiency">Efficiency</span></li>
-                            <li>[logo] <span id="record-detail-peak-power">Peak power</span></li>
-                            <li>[logo] <span id="record-detail-peak-voltage">Peak current</span></li>
-                            <li>[logo] <span id="record-detail-peak-current">Peak voltage</span></li>
-                        </ul>        
-                    </div> 
-                </div>
+                <div data-role="collapsible" data-inset="false" data-collapsed="false">
+                    <h3>General</h3>
+                    <ul data-role="listview" data-inset="false">
+                        <li>
+                            <span class="list-item-value">
+                                <span id="record-detail-startTime">[Start time]</span> ~ <span id="record-detail-endTime">[End Time]</span>
+                            </span>
+                        </li>
+                        <li>
+                            <div class="logo-duration logo-300px"></div> 
+                            <span class="list-item-value" id="record-detail-duration">Duration</span>
+                        </li>
+                        <li>
+                            <div class="logo-energy logo-300px"></div>
+                            <span class="list-item-value" >
+                                <span id="record-detail-energy">Energy consumption</span> kJ
+                            </span>
+                        </li>
+                        <li>
+                            <div class="logo-co2reduction logo-300px"></div> 
+                            <span class="list-item-value" >
+                                <span id="record-detail-co2reduced">?</span> kg CO<small>2</small> redeced
+                            </span>
+                        </li>
+                    </ul>        
+                </div> 
+
+                <div data-role="collapsible" data-inset="false"> 
+                    <h3>Expert</h3>
+                    <ul data-role="listview" data-inset="false">
+                        <li>
+                            <div class="logo-efficiency logo-300px"></div>
+                            <span class="list-item-value" >  
+                                 <span id="record-detail-efficiency">Efficiency</span> %
+                            </span>
+                        </li>
+                        <li>
+                            <div class="logo-power logo-300px"></div> 
+                            <span class="list-item-value" >
+                                <span id="record-detail-peak-power">Peak power</span> W 
+                            </span>
+                        </li>
+                        <li>
+                            <div class="logo-current logo-300px"></div> 
+                            <span class="list-item-value" > 
+                                <span id="record-detail-peak-voltage">Peak current</span> A
+                            </span>
+                        </li>
+                        <li>
+                            <div class="logo-voltage logo-300px"></div> 
+                            <span class="list-item-value" > 
+                                <span id="record-detail-peak-current">Peak voltage</span> V
+                            </span>
+                        </li>
+                    </ul>        
+                </div> 
 
                 <div data-role="collapsible" data-inset="false" data-collapsed="false">
                     <h3>Exercise place</h3>

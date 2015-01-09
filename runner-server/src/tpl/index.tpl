@@ -96,17 +96,41 @@
                         var password = $("#login-password").val();
                         loginSubmit(userid, password);
                     });
-
-                    autoLogin();
+                    
+                    $("#launcher-img").animate({ opacity: 1, left: '0.5em' }, 1000, function() {
+                        $("#label-keepRunning").fadeIn(300, function() {
+                            $("#label-dailySentence").fadeIn(300, function() {
+                                autoLogin();
+                            });
+                        });
+                    });
+                    // autoLogin();
                 });
 
             </script>
-    		<div data-role="header">
+    		<div data-role="header" data-position="fixed" data-tap-toggle="false">
                 <a href="#about" data-rel="dialog" data-transition="pop"
                     class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all">About</a>
                 <h1>Login</h1>
             </div>
             <div data-role="content">
+                <div style="height:12em;">
+                    <div id="launcher-img"
+                         style="opacity:0;
+                                position:absolute;
+                                left:-1.5em;
+                                height:1200px;
+                                width:1014px;
+                                background-image:url(logo/logo-laucher.png);
+                                background-repeat:no-repeat;
+                                background-size:13.5% 13.5%;" ></div>
+                    <span style="float:left;margin-left:8em;">
+                        <p id="label-keepRunning" style="display:none;font-size:1.8em;">Keep running</p>
+                        <p id="label-dailySentence" style="display:none;font-size:0.7em;">
+                            a sentence every day.a sentence every daya sentence every daya sentence every daya sentence every daya sentence every day
+                        </p>
+                    </span>
+                </div>
             	<form>
                     <input id="login-user-name" name="login-user-name" type="text" data-clear-btn="true"
                         placeholder="User name" />
@@ -174,6 +198,9 @@
                 function startEx_startTimeInfoProc(code) {
                     console.log(code);
 
+                    // disable the history button to prevent stopping exercise recording
+                    $("#user-ex-history-btn").fadeOut();
+
                     // 如果qrcode读取成功，处理完信息后将按钮转变成停止功能
                     $("#start-exercise-btn").text("Stop exercising");
 
@@ -194,6 +221,8 @@
                     if (code == null) {
                         alert("Your exercise has been cancled");
                     }
+
+                    $("#user-ex-history-btn").fadeIn();
 
                     // 如果qrcode读取成功，处理完信息后将按钮转变成停止功能
                     $("#start-exercise-btn").text("Start to exercise");
@@ -632,13 +661,14 @@
                 });
             </script>
             <div data-role="header" data-position="fixed" data-tap-toggle="false">
-                <div style="margin:0.35em;" class="logo-back logo-300px" onclick="window.history.back();" ></div>
+                <div style="margin:0.35em;" class="logo-back logo-300px" ></div>
+                <a href="#" data-rel="back" style="opacity:0;">[back]</a>
                 <h1>New user</h1>
                 <a href="#" id="signup-submit"
                     class="ui-btn-right ui-btn ui-btn-inline ui-mini ui-corner-all">Ok</a>
             </div>
             <div data-role="content">
-                <form>
+                <form> 
                     <input id="signup-user-id" type="text" data-clear-btn="true" placeholder="User name" />
                     <p id="signup-user-id-tip" style="display:none;" class="tips-text"></p>
                     <input id="signup-password" type="password" data-clear-btn="true" placeholder="Password" />
