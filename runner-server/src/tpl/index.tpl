@@ -125,11 +125,12 @@
                 <h1>About this app</h1>
             </div>
             <div data-role="content">
+                <img  width="30%" height="30%" alt="runner" src="logo/logo-laucher.png" />
                 <p>App for user to access our system. Thanks.</p>
             </div>
         </div>
 
-        <div data-role="page" id="user_home_page" data-position="fixed" data-tap-toggle="false">
+        <div data-role="page" id="user_home_page" data-dom-cache="true">
             <script type="text/javascript">
                 
                 var IntvId = 0;
@@ -328,7 +329,7 @@
                 });
 
             </script>
-            <div data-role="header">
+            <div data-role="header" data-position="fixed" data-tap-toggle="false">
                 <a href="#login" id="signOutBtn"
                     class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all">Sign out</a>
                 <h1 id="userNameHead">[name]</h1>
@@ -339,10 +340,21 @@
                 <table data-role="table" data-mode="columntoggle" class="ui-responsive table-stroke">
                     <thead>
                         <tr>
-                            <th>Achievement</th>
-                            <th data-priority="1">Duration</th>
-                            <th data-priority="1">Energy</th>
-                            <th data-priority="2">CO<small>2</small> reduced</th>
+                            <th style="height:30px;">
+                                <div class="logo-achievement logo-300px" ></div>
+                            </th>
+                            <th data-priority="1">
+                                <div class="logo-duration logo-300px"></div>
+                                <span style="display:none;">Duration</span>
+                            </th>
+                            <th data-priority="1">
+                                <div class="logo-energy logo-300px"></div>
+                                <span style="display:none;">Energy</span>
+                            </th>
+                            <th data-priority="2">
+                                <div class="logo-co2reduction logo-300px"></div>
+                                <span style="display:none;">CO<small>2</small> reduction</span>
+                            </th>
                             <th data-priority="3">Rank</th>
                         </tr>
                     </thead>
@@ -391,8 +403,14 @@
                     </div>
                     <div id="Exercise-equipment-info" style="margin-top:1em">
                         <ul data-role="listview">
-                            <li>place: gym 001</li>
-                            <li>equipment type: bike</li>
+                            <li> 
+                                <div class="logo-address logo-300px"></div>
+                                <span class="list-item-value">gym 000</span>
+                            </li>
+                            <li>
+                                <div class="logo-xxx logo-300px"></div>
+                                <span class="list-item-value">bike</span>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -401,41 +419,69 @@
                 <table data-role="table" data-mode="column" class="ui-responsive table-stroke">
                     <thead>
                         <tr>
-                            <th>This exercise</th>
-                            <th data-priority="1">Achievement</th>
+                            <th><span class="list-item-value">This exercise</span></th>
+                            <th data-priority="1">
+                                <div class="logo-achievement logo-300px" ></div>
+                                <span class="list-item-value">Achievement</span>
+                            </th>
                         </tr>
                     </thead>
                         <tbody>
                             <tr>
-                                <td>Start time</td>
-                                <td><span id="startTime-thisEx">2014-11-11 15:30</span></td>
+                                <td><span class="list-item-value">Start time</span></td>
+                                <td><span id="startTime-thisEx" class="list-item-value-noicon">2014-11-11 15:30</span></td>
                             </tr>
                             <tr>
-                                <td>End time</td>
-                                <td><span id="endTime-thisEx">2014-11-11 15:32</span></td>
+                                <td><span class="list-item-value">End time</span></td>
+                                <td><span id="endTime-thisEx" class="list-item-value-noicon">2014-11-11 15:32</span></td>
                             </tr>
                             <tr>
-                                <td>Duration</td>
                                 <td>
-                                    <span id="duration-hour-thisEx">0</span> <small>h</small>
-                                    <span id="duration-min-thisEx">2</span> <small>min</small>
+                                    <div class="logo-duration logo-300px"></div>
+                                    <span class="list-item-value">Duration</span>
+                                </td>
+                                <td>
+                                    <span class="list-item-value-noicon"> 
+                                        <span id="duration-hour-thisEx">0</span> <small>h</small>
+                                        <span id="duration-min-thisEx">2</span> <small>min</small>
+                                    </span>
                                 </td>
                             </tr>
                             <tr>
-                                <td>Energy</td>
-                                <td><span id="energy-thisTime">100</span> kWh</td>
+                                <td>
+                                    <div class="logo-energy logo-300px"></div>
+                                    <span class="list-item-value">Energy</span>
+                                </td>
+                                <td>
+                                    <span class="list-item-value-noicon"><span id="energy-thisTime">100</span> kWh</span>
+                                </td>
                             </tr>
                             <tr>
-                                <td>Peak Power</td>
-                                <td><span id="peak-power-thisTime">450</span> W</td>
+                                <td>
+                                    <div class="logo-power logo-300px"></div>
+                                    <span class="list-item-value">Peak Power</span>
+                                </td>
+                                <td>
+                                    <span class="list-item-value-noicon"><span id="peak-power-thisTime">450</span> W</span>
+                                </td>
                             </tr>
                             <tr>
-                                <td>Efficiency</td>
-                                <td><span id="efficiency-thisTime">78</span> %</td>
+                                <td>
+                                    <div class="logo-efficiency logo-300px"></div>
+                                    <span class="list-item-value">Efficiency</span>
+                                </td>
+                                <td>
+                                    <span class="list-item-value-noicon"><span id="efficiency-thisTime">78</span> %</span>
+                                </td>
                             </tr>
                             <tr>
-                                <td>CO<small>2</small> reduced</td>
-                                <td><span id="co2-reduced-thisTime">1.1</span> kg</td>
+                                <td>
+                                    <div class="logo-co2reduction logo-300px"></div>
+                                    <span class="list-item-value">CO<small>2</small> reduced</span>
+                                </td>
+                                <td>
+                                    <span class="list-item-value-noicon"><span id="co2-reduced-thisTime">1.1</span> kg</span>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -585,9 +631,8 @@
                     });
                 });
             </script>
-            <div data-role="header">
-                <a href="#login" data-rel="back"
-                    class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all">Back</a>
+            <div data-role="header" data-position="fixed" data-tap-toggle="false">
+                <div style="margin:0.35em;" class="logo-back logo-300px" onclick="window.history.back();" ></div>
                 <h1>New user</h1>
                 <a href="#" id="signup-submit"
                     class="ui-btn-right ui-btn ui-btn-inline ui-mini ui-corner-all">Ok</a>
