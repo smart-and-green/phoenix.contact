@@ -344,18 +344,27 @@ def getUserMonthExRecord(db):
         record["equipment_id"] = row[1]
         cr.execute('''SELECT * FROM equipment_information WHERE(equ_id=%(equ_id)s)''',
                                     {"equ_id":record["equipment_id"]})
-        equipment_inf = cr.fetchall()[0]
+        equipment_inf = cr.fetchall()
         print "equipment_inf:",equipment_inf
-        record["exEquipment"]["equipment_id"] = equipment_inf[0]
-        exercise_area_id = equipment_inf[1]
-        record["exEquipment"]["type"] = equipment_inf[2]
-        record["exEquipment"]["name"] = equipment_inf[3]
-        cr.execute('''SELECT * FROM exercise_area_information WHERE(exercise_area_id=%(exercise_area_id)s)''',
+        if (equipment_inf):
+            equipment_inf = equipment_inf[0]       
+            record["exEquipment"]["equipment_id"] = equipment_inf[0]
+            exercise_area_id = equipment_inf[1]
+            record["exEquipment"]["type"] = equipment_inf[2]
+            record["exEquipment"]["name"] = equipment_inf[3]
+            cr.execute('''SELECT * FROM exercise_area_information WHERE(exercise_area_id=%(exercise_area_id)s)''',
                                     {"exercise_area_id":exercise_area_id})
-        exercise_area = cr.fetchall()[0]
-        print "exercise_area:",exercise_area
-        record["exEquipment"]["fitnessCenterName"] = exercise_area[1]
-        record["exEquipment"]["fitnessCenterAddress"] = exercise_area[2]
+            exercise_area = cr.fetchall()[0]
+            print "exercise_area:",exercise_area
+            record["exEquipment"]["fitnessCenterName"] = exercise_area[1]
+            record["exEquipment"]["fitnessCenterAddress"] = exercise_area[2]
+        else:
+            print "不存在该健身器材的信息"
+            record["exEquipment"]["equipment_id"] = record["equipment_id"]
+            record["exEquipment"]["type"] = "-"
+            record["exEquipment"]["name"] = "-"
+            record["exEquipment"]["fitnessCenterName"] = "-"
+            record["exEquipment"]["fitnessCenterAddress"] = "-"
         record["startTime"] = row[2].__str__()
         record["endTime"] = row[3].__str__()
         record["energy"] = row[5]
