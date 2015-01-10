@@ -10,6 +10,7 @@
         <script type="text/javascript" src="js/jquery-1.8.3.min.js"></script>
         <script type="text/javascript" src="js/jquery.mobile-1.4.5.min.js"></script>   
         <script type="text/javascript" src="js/cordova.js"></script>
+        <script type="text/javascript" src="js/runner-global.js"></script>
 	</head>
 
 	<body>
@@ -31,7 +32,7 @@
                     }
 
                     $.ajax({
-                        url: "getUserMonthExRecord",
+                        url: SERVER_ADDRESS + "/getUserMonthExRecord",
                         type: "post",
                         data: { 
                             userid: userid,
@@ -56,12 +57,12 @@
                                 var recordTemplate = "\
                                     <li>\
                                         <a href='[link]'>\
-                                            <h2>[exercise-type]</h2>\
+                                            <h2 id='exercise-type-'>[exercise type]</h2>\
                                             <span style='display:none;' id='date-'>[date]</span>\
                                             <p>\
                                                 <span id='datestr-'> [datestr] </span>\
-                                                <span id='start-time-'>[start-time]</span> \
-                                                <span style='display:none;' id='end-time-'>[end-time]</span>\
+                                                <span id='start-time-'>[start time]</span> \
+                                                <span style='display:none;' id='end-time-'>[end time]</span>\
                                                 <strong>duration: </strong><span id='duration-'>[duration]</span>\
                                             </p>\
                                             <p class='ui-li-aside'><strong><span id='erengy-'>[energy]</span></strong>kJ</p>\
@@ -69,6 +70,10 @@
                                             <span style='display:none;' id='peak-power-'>[peak power]</span>\
                                             <span style='display:none;' id='peak-voltage-'>[peak voltage]</span>\
                                             <span style='display:none;' id='peak-current-'>[peak current]</span>\
+                                            <span style='display:none;' id='ex-equipment-id-'>[ex equipment id]</span>\
+                                            <span style='display:none;' id='ex-equipment-name-'>[ex equipment name]</span>\
+                                            <span style='display:none;' id='ex-equipment-fitnessCenterName-'>[ex equipment fitnessCenterName]</span>\
+                                            <span style='display:none;' id='ex-equipment-fitnessCenterAddress-'>[ex equipment fitnessCenterAddress]</span>\
                                         </a>\
                                     </li>";
 
@@ -120,17 +125,22 @@
                                     }
                                     var record = recordTemplate
                                             .replace("[link]", "#" + recordIndex)
-                                            .replace("[exercise-type]", "bike")
+                                            .replace("[exercise type]", result.histories[index].exEquipment.type)
                                             .replace("[energy]", result.histories[index].energy)
                                             .replace("[duration]", durationHour + "h " + durationMinute + "m " + durationSecond + "s")
                                             .replace("[datestr]", dateStr)
                                             .replace("[date]", startTime.toLocaleDateString())
-                                            .replace("[start-time]", startTime.toLocaleTimeString())
-                                            .replace("[end-time]", endTime.toLocaleTimeString())
+                                            .replace("[start time]", startTime.toLocaleTimeString())
+                                            .replace("[end time]", endTime.toLocaleTimeString())
                                             .replace("[efficiency]", result.histories[index].efficiency)
-                                            .replace("[peak-power]", result.histories[index].peakPower)
-                                            .replace("[peak-voltage]", result.histories[index].peakVoltage)
-                                            .replace("[peak-current]", result.histories[index].peakCurrent);
+                                            .replace("[peak power]", result.histories[index].peakPower)
+                                            .replace("[peak voltage]", result.histories[index].peakVoltage)
+                                            .replace("[peak current]", result.histories[index].peakCurrent)
+                                            .replace("[ex equipment id]", result.histories[index].exEquipment.equipment_id)
+                                            .replace("[ex equipment name]", result.histories[index].exEquipment.name)
+                                            .replace("[ex equipment fitnessCenterName]", result.histories[index].exEquipment.fitnessCenterName)
+                                            .replace("[ex equipment fitnessCenterAddress]", result.histories[index].exEquipment.fitnessCenterAddress)
+                                            ;
                                     var recordElement = $(record);
                                     recordElement.click(function() { 
                                         var efficiency = $(this).find("#efficiency-").text();
@@ -142,7 +152,13 @@
                                         var endTime = $(this).find("#end-time-").text();
                                         var duration = $(this).find("#duration-").text();
                                         var energy = $(this).find("#erengy-").text();
-                                        var co2reduced = parseFloat(energy) * 2;
+                                        var co2reduced = parseFloat(energy) * CO2_REDUCTION_GRAM_PER_1kWh;
+                                        var exEquipmentId = $(this).find("#ex-equipment-id-").text();
+                                        var exEquipmentName = $(this).find("#ex-equipment-name-").text();
+                                        var exEquipmentType= $(this).find("#exercise-type-").text();
+                                        var fitnessCenterName = $(this).find("#ex-equipment-fitnessCenterName-").text();
+                                        var fitnessCenterAddress= $(this).find("#ex-equipment-fitnessCenterAddress-").text();
+
                                         $("#record-detail-title").text(date);
                                         $("#record-detail-efficiency").text(efficiency);
                                         $("#record-detail-peak-power").text(peakPower);
@@ -153,6 +169,12 @@
                                         $("#record-detail-duration").text(duration);
                                         $("#record-detail-energy").text(energy);
                                         $("#record-detail-co2reduced").text(co2reduced);
+
+                                        $("#record-detail-fitness-equipment-type").text(exEquipmentType);
+                                        $("#record-detail-fitness-equipment-name").text(exEquipmentName);
+                                        $("#record-detail-fitness-equipment-id").text(exEquipmentId);
+                                        $("#record-detail-fitness-center-name").text(fitnessCenterName);
+                                        $("#record-detail-fitness-center-addr").text(fitnessCenterAddress);
 
                                         $.mobile.changePage("user_exercise_history#detail_page", "slideUp");
                                     });
@@ -278,13 +300,13 @@
                         <li>
                             <div class="logo-energy logo-300px"></div>
                             <span class="list-item-value" >
-                                <span id="record-detail-energy">Energy consumption</span> kJ
+                                <span id="record-detail-energy">Energy consumption</span> kWh
                             </span>
                         </li>
                         <li>
                             <div class="logo-co2reduction logo-300px"></div> 
                             <span class="list-item-value" >
-                                <span id="record-detail-co2reduced">?</span> kg CO<small>2</small> redeced
+                                <span id="record-detail-co2reduced">?</span> g CO<small>2</small> redeced
                             </span>
                         </li>
                     </ul>        
@@ -323,12 +345,15 @@
                 <div data-role="collapsible" data-inset="false" data-collapsed="false">
                     <h3>Exercise place</h3>
                     <ul data-role="listview" data-inset="false">
-                        <li><span id="record-detail0-fitness-equipment-type">[equipment type]</span></li>
+                        <li><span id="record-detail-fitness-equipment-type">[equipment type]</span></li>
                         <li>
                             <span id="record-detail-fitness-center-name">[fitness center name]</span><br>
                             <small id="record-detail-fitness-center-addr">[fitness center address]</small>
                         </li>
-                        <li><span id="record-detail-fitness-equipment-No">[fitness equipment No.]</span></li>
+                        <li>
+                            <span id="record-detail-fitness-equipment-id" style="background-color:#FF6600;color:white;padding:0.25em;border-radius:5px;">[fitness equipment id]</span>    
+                            <span id="record-detail-fitness-equipment-name">[fitness equipment name]</span>    
+                        </li>
                     </ul>        
                 </div> 
             </div>

@@ -11,6 +11,7 @@
         <script type="text/javascript" src="js/jquery.mobile-1.4.5.min.js"></script>
         
         <script type="text/javascript" src="js/cordova.js"></script>
+        <script type="text/javascript" src="js/runner-global.js"></script>
         <script type="text/javascript" charset="utf-8" src="js/api.nfcPlugin.js"></script>
 
 	</head>
@@ -20,13 +21,13 @@
 
     	<div data-role="page" id="login">
             <script type="text/javascript">
-
+                
                 function loginSubmit(userid, password) {
                     // clear the login result
                     $("#login-result").text("");
                     
                     $.ajax({
-                        url: "login",
+                        url: SERVER_ADDRESS + "/login",
                         type: "post",
                         data: {
                             userid: userid,
@@ -45,30 +46,38 @@
 
                                 $("#userNameHead").text(userData.name);
                                 
-                                $("#duration-summary").text(userData.summary.duration);
+                                $("#duration-summary").text(secondsToDurationStr(userData.summary.duration));
                                 $("#energy-summary").text(userData.summary.energy);
-                                $("#co2-summary").text(userData.summary.energy * 10);   // 此处修改换算公式
+                                $("#co2-summary").text(userData.summary.energy * CO2_REDUCTION_GRAM_PER_1kWh);   // 此处修改换算公式
                                 $("#energy-rank-summary").text(userData.summary.globalRank);
 
-                                $("#duration-average").text(userData.average.duration);
+                                $("#duration-average").text(secondsToDurationStr(userData.average.duration));
                                 $("#energy-average").text(userData.average.energy);
-                                $("#co2-average").text(userData.average.energy * 10);
+                                $("#co2-average").text(userData.average.energy * CO2_REDUCTION_GRAM_PER_1kWh);
                                 $("#energy-rank-average").text(userData.average.globalRank);
 
                                 // 如果上个月有记录，则显示出来 
                                 if (userData.lastMonthSummary) {
-                                    $("#duration-lastMonth").text(userData.lastMonthSummary.duration);
+                                    $("#duration-lastMonth").text(secondsToDurationStr(userData.lastMonthSummary.duration));
                                     $("#energy-lastMonth").text(userData.lastMonthSummary.energy);
-                                    $("#co2-lastMonth").text(userData.lastMonthSummary.energy * 10);
-                                    $("#energy-rank-lastMonth").text(userData.lastMonthSummary.globalRank);
+                                    $("#co2-lastMonth").text(userData.lastMonthSummary.energy * CO2_REDUCTION_GRAM_PER_1kWh);
+                                    if (userData.lastMonthSummary.globalRank == 0) {
+                                        $("#energy-rank-lastMonth").text("-");
+                                    } else {
+                                        $("#energy-rank-lastMonth").text(userData.lastMonthSummary.globalRank);
+                                    }
                                 }
 
                                 // 如果这个月有锻炼记录，则显示出来
                                 if (userData.thisMonthSummary) {
-                                    $("#duration-thisMonth").text(userData.thisMonthSummary.duration);
+                                    $("#duration-thisMonth").text(secondsToDurationStr(userData.thisMonthSummary.duration));
                                     $("#energy-thisMonth").text(userData.thisMonthSummary.energy);
-                                    $("#co2-thisMonth").text(userData.thisMonthSummary.energy * 10);
-                                    $("#energy-rank-thisMonth").text(userData.thisMonthSummary.globalRank);
+                                    $("#co2-thisMonth").text(userData.thisMonthSummary.energy * CO2_REDUCTION_GRAM_PER_1kWh);
+                                    if (userData.thisMonthSummary.globalRank == 0) {
+                                        $("#energy-rank-thisMonth").text("-");
+                                    } else {
+                                        $("#energy-rank-thisMonth").text(userData.thisMonthSummary.globalRank);
+                                    }
                                 }
                                 
                                 window.location.href = "#user_home_page";
@@ -104,7 +113,6 @@
                             });
                         });
                     });
-                    // autoLogin();
                 });
 
             </script>
@@ -175,7 +183,7 @@
 
                 function uploadExRecord(exerciseData) {
                     $.ajax({
-                        url: "uploadExRecord",
+                        url: SERVER_ADDRESS + "/uploadExRecord",
                         type: "post",
                         data: exerciseData,
                         datatype: "json",
@@ -183,7 +191,7 @@
                         crossDomain: true,
                         success: function(result) {
                             if (result.success) {
-                                alert("upload ok!");
+                                // alert("upload ok!");
                             } else {
                                 alert("upload fail");
                             }
@@ -269,7 +277,7 @@
                     $("#energy-thisTime").text(exerciseData.energy);
                     $("#peak-power-thisTime").text(exerciseData.peakPower);
                     $("#efficiency-thisTime").text(exerciseData.efficiency);
-                    $("#co2-reduced-thisTime").text(exerciseData.energy * 10);  // 换算得到
+                    $("#co2-reduced-thisTime").text(exerciseData.energy * CO2_REDUCTION_GRAM_PER_1kWh);  // 换算得到
                     
                     // display the dashboard
                     $("#exercise-achievement-thisTime").slideDown();
@@ -392,28 +400,28 @@
                             <td>Summary</td>
                             <td><span id="duration-summary">10h 12min</span></td>
                             <td><span id="energy-summary">100</span> kWh</td>
-                            <td><span id="co2-summary">1.2</span> kg</td>
+                            <td><span id="co2-summary">1.2</span> g</td>
                             <td><span id="energy-rank-summary">1</span></td>
                         </tr>
                         <tr>
                             <td>Average</td>
                             <td><span id="duration-average">10h 12min</span></td>
                             <td><span id="energy-average">100</span> kWh</td>
-                            <td><span id="co2-average">1.5</span> kg</td>
+                            <td><span id="co2-average">1.5</span> g</td>
                             <td><span id="energy-rank-average">1</span></td>
                         </tr>
                         <tr>
                             <td>Last Month</td>
                             <td><span id="duration-lastMonth">0h 0min</span></td>
                             <td><span id="energy-lastMonth">0</span> kWh</td>
-                            <td><span id="co2-lastMonth">0</span> kg</td>
+                            <td><span id="co2-lastMonth">0</span> g</td>
                             <td><span id="energy-rank-lastMonth">-</span></td>
                         </tr>
                         <tr>
                             <td>This Month</td>
                             <td><span id="duration-thisMonth">0h 0min</span></td>
                             <td><span id="energy-thisMonth">0</span> kWh</td>
-                            <td><span id="co2-thisMonth">0</span> kg</td>
+                            <td><span id="co2-thisMonth">0</span> g</td>
                             <td><span id="energy-rank-thisMonth">-</span></td>
                         </tr>
                      </tbody>
@@ -509,7 +517,7 @@
                                     <span class="list-item-value">CO<small>2</small> reduced</span>
                                 </td>
                                 <td>
-                                    <span class="list-item-value-noicon"><span id="co2-reduced-thisTime">1.1</span> kg</span>
+                                    <span class="list-item-value-noicon"><span id="co2-reduced-thisTime">1.1</span> g</span>
                                 </td>
                             </tr>
                         </tbody>
@@ -533,7 +541,7 @@
                         formatInvalid();
                     } else {
                         $.ajax({
-                            url: "checkUserid",
+                            url: SERVER_ADDRESS + "/checkUserid",
                             type: "post",
                             data: {
                                 userid: userid_
@@ -552,20 +560,21 @@
                     }
                 }
 
-                function submitSignUpInfo(userid, password, mobile, address, userName, handleError) {
+                function submitSignUpInfo(userid, password, userName, mobile, email, address, handleError) {
                     $.ajax({
-                        url: "signup",
+                        url: SERVER_ADDRESS + "/signup",
                         type: "post",
                         data: {
                             userid: userid,
                             password: password,
                             userName: userName,
                             mobile: mobile,
+                            email: email,
                             address: address
                         },
                         datatype: "json",
                         async: true,
-                        crossDomain: true,
+                        crossDomain: true
                     }).then(function(result) {
                         if (result.success) {
                             // 注册成功后直接登陆
@@ -583,6 +592,7 @@
                         var password_re = $("#signup-password-repeat").val();
                         var name = $("#signup-user-name").val();
                         var mobile = $("#signup-user-mobile").val();
+                        var email = $("#signup-user-email").val();
                         var address = $("#signup-user-address").val();
 
                         var check_ok = true;
@@ -619,7 +629,7 @@
                         }
 
                         if (check_ok) {
-                            submitSignUpInfo(userid, password, name, mobile, address, function(reason) {
+                            submitSignUpInfo(userid, password, name, mobile, email, address, function(reason) {
                                 // handle the error reason
                                 if (reason == 1) {
                                     $("#signup-result").text("user name exist, please change another.");
