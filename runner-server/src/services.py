@@ -445,6 +445,18 @@ def signup(db):
     userid = request.POST.get('userid')
     password = request.POST.get('password')
     username = request.POST.get('userName')
+    mobile = request.POST.get('mobile')
+    address = request.POST.get('address')
+    email = request.POST.get('email')
+    if not(username):
+        username = userid
+    if not(mobile):
+        mobile = "-"
+    if not(address):
+        address = "-"
+    if not(email):
+        email = "-"
+    print "userid:",userid,"username:",username,"mobile:",mobile,"address:",address,"email:",email
     ret = {}
     ret["success"] = True
     ret["reason"] = 0
@@ -463,14 +475,10 @@ def signup(db):
         cr.execute("INSERT INTO total_information (user_id,exercise_number) VALUES (%s,%s)",(userid,0))
         db.commit()
         print "这能执行吧"
-        if (username == ""):  
-            print "这不会执行,前端已经写好了."           
-            cr.execute("INSERT INTO user_information (user_id,nickname) VALUES (%s,%s)",(userid,userid))
-            db.commit()
-        else:
-            cr.execute("INSERT INTO user_information (user_id,nickname) VALUES (%s,%s)",(userid,username))
-            db.commit()
-            print "怎么回事呢"
+        cr.execute("INSERT INTO user_information (user_id,nickname,address,mobile,email) VALUES (%s,%s,%s,%s,%s)",
+                                 (userid,username,address,mobile,email))
+        db.commit()
+
         print "注册成功"
     else:
         pass
