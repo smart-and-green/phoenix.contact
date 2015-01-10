@@ -107,5 +107,14 @@
     margin-left: 0px;
     vertical-align: middle;
 }
+
+
+.equipment-id-tag {
+    background-color: purple; 
+    color: white;
+    font-size: 0.8em;
+    padding: 0.25em;
+    border-radius: 5px;
 }
+
 

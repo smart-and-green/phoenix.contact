@@ -152,7 +152,7 @@
                                         var endTime = $(this).find("#end-time-").text();
                                         var duration = $(this).find("#duration-").text();
                                         var energy = $(this).find("#erengy-").text();
-                                        var co2reduced = parseFloat(energy) * CO2_REDUCTION_GRAM_PER_1kWh;
+                                        var co2reduced = (parseFloat(energy) * CO2_REDUCTION_GRAM_PER_1kWh).toFixed(3);
                                         var exEquipmentId = $(this).find("#ex-equipment-id-").text();
                                         var exEquipmentName = $(this).find("#ex-equipment-name-").text();
                                         var exEquipmentType= $(this).find("#exercise-type-").text();
@@ -345,13 +345,17 @@
                 <div data-role="collapsible" data-inset="false" data-collapsed="false">
                     <h3>Exercise place</h3>
                     <ul data-role="listview" data-inset="false">
-                        <li><span id="record-detail-fitness-equipment-type">[equipment type]</span></li>
                         <li>
-                            <span id="record-detail-fitness-center-name">[fitness center name]</span><br>
-                            <small id="record-detail-fitness-center-addr">[fitness center address]</small>
+                            <div class="logo-exercise-type-xxx logo-300px"></div>
+                            <span class="list-item-value" id="record-detail-fitness-equipment-type">[equipment type]</span>
                         </li>
                         <li>
-                            <span id="record-detail-fitness-equipment-id" style="background-color:#FF6600;color:white;padding:0.25em;border-radius:5px;">[fitness equipment id]</span>    
+                            <div class="logo-address logo-300px"></div>
+                            <span style="margin-left:40px;" id="record-detail-fitness-center-name">[fitness center name]</span><br>
+                            <small style="margin-left:40px;" id="record-detail-fitness-center-addr">[fitness center address]</small>
+                        </li>
+                        <li>
+                            <span id="record-detail-fitness-equipment-id" class="equipment-id-tag">[fitness equipment id]</span>    
                             <span id="record-detail-fitness-equipment-name">[fitness equipment name]</span>    
                         </li>
                     </ul>        
