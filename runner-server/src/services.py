@@ -370,6 +370,8 @@ def getUserMonthExRecord(db):
         record["energy"] = row[5]
         record["peakPower"] = row[6]
         record["efficiency"] = row[7]
+        record["peakCurrent"] = row[8]
+        record["peakVoltage"] = row[9]
         ret["histories"].append(record)
     print ret
     cr.close()
