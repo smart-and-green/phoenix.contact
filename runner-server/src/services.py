@@ -287,7 +287,38 @@ def login(db):
 @app.route('/user_exercise_history')
 def user_exercise_history():
     return template('tpl/user_exercise_history')
-    
+
+@app.route('/getExEquipmentData', method = 'POST')
+def getExEquipmentData(db): 
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Origin, Accept, Content-Type, X-Requested-With, X-CSRF-Token'
+    equipmentid = request.POST.get('equipmentid') 
+    ret = {}
+    ret["exEquipmentData"] = {}
+    ret["success"] = True
+    cr = db.cursor()
+    cr.execute('''SELECT * FROM equipment_information WHERE(equ_id=%(equ_id)s)''',
+                                    {"equ_id":equipmentid})
+    equipment_inf = cr.fetchall()
+    print "equipment_inf:",equipment_inf
+    if (equipment_inf):
+        equipment_inf = equipment_inf[0]       
+        ret["exEquipmentData"]["equipment_id"] = equipment_inf[0]
+        exercise_area_id = equipment_inf[1]
+        ret["exEquipmentData"]["type"] = equipment_inf[2]
+        ret["exEquipmentData"]["name"] = equipment_inf[3]
+        cr.execute('''SELECT * FROM exercise_area_information WHERE(exercise_area_id=%(exercise_area_id)s)''',
+                                    {"exercise_area_id":exercise_area_id})
+        exercise_area = cr.fetchall()[0]
+        print "exercise_area:",exercise_area
+        ret["exEquipmentData"]["fitnessCenterName"] = exercise_area[1]
+        ret["exEquipmentData"]["fitnessCenterAddress"] = exercise_area[2]
+    else:
+        print "不存在该健身器材的信息"
+        ret["success"] = False
+    return ret
+   
 
 @app.route('/getUserMonthExRecord', method = 'POST')
 def getUserMonthExRecord(db):
