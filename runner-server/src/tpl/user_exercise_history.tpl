@@ -355,7 +355,9 @@
                             <small style="margin-left:40px;" id="record-detail-fitness-center-addr">[fitness center address]</small>
                         </li>
                         <li>
-                            <span id="record-detail-fitness-equipment-id" class="equipment-id-tag">[fitness equipment id]</span>    
+                            <span id="record-detail-fitness-equipment-id" class="equipment-id-tag"
+                                    style="background-color:purple;color:white;font-size:0.8em;padding:0.25em;border-radius:5px;"
+                                    >[fitness equipment id]</span>    
                             <span id="record-detail-fitness-equipment-name">[fitness equipment name]</span>    
                         </li>
                     </ul>        

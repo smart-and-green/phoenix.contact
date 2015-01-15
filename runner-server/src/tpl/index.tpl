@@ -310,17 +310,17 @@
 
                 function exerciseCommand(command) {
                     var success = function(data) {  
-                        alert("card id:\n" + data.cardId);  
+                        // alert("card id:\n" + data.cardId);  
                         var sector1str = "";
                         for (var i = 32; i < 48; ++i) {
                             sector1str += data.cardData[i].toString(16) + " ";
                         }
-                        alert("block 2:\n" + sector1str);
+                        // alert("block 2:\n" + sector1str);
                         sector1str = "";
                         for (var i = 48; i < 64; ++i) {
                             sector1str += data.cardData[i].toString(16) + " ";
                         }
-                        alert("ctrl block:\n" + sector1str);
+                        // alert("ctrl block:\n" + sector1str);
 
                         if (command == "start") {
                             startEx_startTimeInfoProc("[put exercise info here]");
@@ -453,7 +453,6 @@
 
                 <div></div>
                 <button id="start-exercise-btn">Start to exercise</button><br>
-                
                 <div id="exercise-timer" style="display:none;">
                     <div>
                         <center>
@@ -473,7 +472,9 @@
                                 <span class="list-item-value" id="exercising-equipmentType">bike</span>
                             </li>
                             <li>
-                                <span id="exercising-equipmentId" class="equipment-id-tag">[fitness equipment id]</span>    
+                                <span id="exercising-equipmentId" class="equipment-id-tag"
+                                        style="background-color:purple;color:white;font-size:0.8em;padding:0.25em;border-radius:5px;"
+                                        >[fitness equipment id]</span>    
                                 <span id="exercising-equipmentName">[fitness equipment name]</span>    
                             </li>
                         </ul>
