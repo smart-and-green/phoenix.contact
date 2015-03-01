@@ -48,19 +48,19 @@
                                 
                                 $("#duration-summary").text(secondsToDurationStr(userData.summary.duration));
                                 $("#energy-summary").text(userData.summary.energy);
-                                $("#co2-summary").text(userData.summary.energy * CO2_REDUCTION_GRAM_PER_1kWh);   // 此处修改换算公式
+                                $("#co2-summary").text((userData.summary.energy * CO2_REDUCTION_GRAM_PER_1kWh).toFixed(2));   // 此处修改换算公式
                                 $("#energy-rank-summary").text(userData.summary.globalRank);
 
                                 $("#duration-average").text(secondsToDurationStr(userData.average.duration));
                                 $("#energy-average").text(userData.average.energy);
-                                $("#co2-average").text(userData.average.energy * CO2_REDUCTION_GRAM_PER_1kWh);
+                                $("#co2-average").text((userData.average.energy * CO2_REDUCTION_GRAM_PER_1kWh).toFixed(2));
                                 $("#energy-rank-average").text(userData.average.globalRank);
 
                                 // 如果上个月有记录，则显示出来 
                                 if (userData.lastMonthSummary) {
                                     $("#duration-lastMonth").text(secondsToDurationStr(userData.lastMonthSummary.duration));
                                     $("#energy-lastMonth").text(userData.lastMonthSummary.energy);
-                                    $("#co2-lastMonth").text(userData.lastMonthSummary.energy * CO2_REDUCTION_GRAM_PER_1kWh);
+                                    $("#co2-lastMonth").text((userData.lastMonthSummary.energy * CO2_REDUCTION_GRAM_PER_1kWh).toFixed(2));
                                     if (userData.lastMonthSummary.globalRank == 0) {
                                         $("#energy-rank-lastMonth").text("-");
                                     } else {
@@ -72,7 +72,7 @@
                                 if (userData.thisMonthSummary) {
                                     $("#duration-thisMonth").text(secondsToDurationStr(userData.thisMonthSummary.duration));
                                     $("#energy-thisMonth").text(userData.thisMonthSummary.energy);
-                                    $("#co2-thisMonth").text(userData.thisMonthSummary.energy * CO2_REDUCTION_GRAM_PER_1kWh);
+                                    $("#co2-thisMonth").text((userData.thisMonthSummary.energy * CO2_REDUCTION_GRAM_PER_1kWh).toFixed(2));
                                     if (userData.thisMonthSummary.globalRank == 0) {
                                         $("#energy-rank-thisMonth").text("-");
                                     } else {
@@ -135,7 +135,8 @@
                     <span style="float:left;margin-left:8em;">
                         <p id="label-keepRunning" style="display:none;font-size:1.8em;">Keep running</p>
                         <p id="label-dailySentence" style="display:none;font-size:0.7em;">
-                            a sentence every day.a sentence every daya sentence every daya sentence every daya sentence every daya sentence every day
+                            The whole world is a tuxedo and you are a pair of brown shoes.
+                                    -- George Gobel
                         </p>
                     </span>
                 </div>
@@ -147,8 +148,10 @@
                     <a id="loginSubmit" class="ui-btn ui-corner-all">Login</a>
                     <a href="#sign_up_page" class="ui-btn ui-corner-all">Sign up</a>
                 </form>
-
                 <p id="login-result" style="color:red;"></p>
+                <p style="font-size:0.7em;">
+                    <span style="color:red;">(?) </span><a href="#" >Find my password back.</a>
+                </p>
             </div>
     	</div>
 
@@ -158,7 +161,9 @@
             </div>
             <div data-role="content">
                 <img  width="30%" height="30%" alt="runner" src="logo/logo-laucher.png" />
-                <p>App for user to access our system. Thanks.</p>
+                <p>
+                    App for user to access our system. Thanks.
+                </p>
             </div>
         </div>
 
@@ -206,23 +211,45 @@
                 function startEx_startTimeInfoProc(code) {
                     console.log(code);
 
-                    // disable the history button to prevent stopping exercise recording
-                    $("#user-ex-history-btn").fadeOut();
-
-                    // 如果qrcode读取成功，处理完信息后将按钮转变成停止功能
-                    $("#start-exercise-btn").text("Stop exercising");
-
-                    var myDate = new Date();
-                    var currentMillis = myDate.getTime();
-                    StartSecStamp = currentMillis / 1000;
-                    IntvId = window.setInterval(updateDurationDisp, 1000);
-
                     // 从code中读出EquipmentId
                     EquipmentId = "X000";
                     
-                    // display the dashboard
-                    $("#exercise-achievement-thisTime").slideUp();
-                    $("#exercise-timer").slideDown();
+                    $.ajax({
+                        url: SERVER_ADDRESS + "/getExEquipmentData",
+                        type: "post",
+                        data: { equipmentid: EquipmentId },
+                        datatype: "json",
+                        async: true,
+                        crossDomain: true,
+                        success: function(result) {
+
+                            // 当检测到该锻炼设备是有效的之后再开始锻炼
+                            if (result.success) {
+                                // disable the history button to prevent stopping exercise recording
+                                $("#user-ex-history-btn").fadeOut();
+
+                                // 如果qrcode读取成功，处理完信息后将按钮转变成停止功能
+                                $("#start-exercise-btn").text("Stop exercising");
+
+                                var myDate = new Date();
+                                var currentMillis = myDate.getTime();
+                                StartSecStamp = currentMillis / 1000;
+                                IntvId = window.setInterval(updateDurationDisp, 1000);
+                                
+                                // display the equipment information
+                                $("#exercising-fitnessCenterName").text(result.exEquipmentData.fitnessCenterName);
+                                $("#exercising-equipmentType").text(result.exEquipmentData.type);
+                                $("#exercising-equipmentName").text(result.exEquipmentData.name);
+                                $("#exercising-equipmentId").text(result.exEquipmentData.equipment_id);
+
+                                // display the dashboard
+                                $("#exercise-achievement-thisTime").slideUp();
+                                $("#exercise-timer").slideDown();
+                            } else {
+                                alert("Sorry, this exercise equipment has not registered, please contact the administrator.");
+                            }
+                        }
+                    });
                 }
                 function stopEx_endTimeInfoProc(code) {
                     console.log(code);
@@ -277,7 +304,7 @@
                     $("#energy-thisTime").text(exerciseData.energy);
                     $("#peak-power-thisTime").text(exerciseData.peakPower);
                     $("#efficiency-thisTime").text(exerciseData.efficiency);
-                    $("#co2-reduced-thisTime").text(exerciseData.energy * CO2_REDUCTION_GRAM_PER_1kWh);  // 换算得到
+                    $("#co2-reduced-thisTime").text((exerciseData.energy * CO2_REDUCTION_GRAM_PER_1kWh).toFixed(3));  // 换算得到
                     
                     // display the dashboard
                     $("#exercise-achievement-thisTime").slideDown();
@@ -286,17 +313,17 @@
 
                 function exerciseCommand(command) {
                     var success = function(data) {  
-                        alert("card id:\n" + data.cardId);  
+                        // alert("card id:\n" + data.cardId);  
                         var sector1str = "";
                         for (var i = 32; i < 48; ++i) {
                             sector1str += data.cardData[i].toString(16) + " ";
                         }
-                        alert("block 2:\n" + sector1str);
+                        // alert("block 2:\n" + sector1str);
                         sector1str = "";
                         for (var i = 48; i < 64; ++i) {
                             sector1str += data.cardData[i].toString(16) + " ";
                         }
-                        alert("ctrl block:\n" + sector1str);
+                        // alert("ctrl block:\n" + sector1str);
 
                         if (command == "start") {
                             startEx_startTimeInfoProc("[put exercise info here]");
@@ -429,24 +456,29 @@
 
                 <div></div>
                 <button id="start-exercise-btn">Start to exercise</button><br>
-                
                 <div id="exercise-timer" style="display:none;">
                     <div>
                         <center>
-                            <span id="exercise-duration-hour" class="em-tips-timer-minhour">0</span><small class="em-tips-timer-minhour">h </small>
-                            <span id="exercise-duration-min" class="em-tips-timer-minhour">0</span><small class="em-tips-timer-minhour">m </small>
-                            <span id="exercise-duration-sec" class="em-tips-timer-sec">0</span><small class="em-tips-timer-sec">s </small>
+                            <span id="exercise-duration-hour" class="em-tips-timer-minhour">0</span><small><small class="em-tips-timer-minhour">h </small></small>
+                            <span id="exercise-duration-min" class="em-tips-timer-minhour">0</span><small><small class="em-tips-timer-minhour">m </small></small>
+                            <span id="exercise-duration-sec" class="em-tips-timer-sec">0</span><small><small class="em-tips-timer-sec">s </small></small>
                         </center>
                     </div>
                     <div id="Exercise-equipment-info" style="margin-top:1em">
                         <ul data-role="listview">
                             <li> 
                                 <div class="logo-address logo-300px"></div>
-                                <span class="list-item-value">gym 000</span>
+                                <span class="list-item-value" id="exercising-fitnessCenterName">gym 000</span>
                             </li>
                             <li>
                                 <div class="logo-xxx logo-300px"></div>
-                                <span class="list-item-value">bike</span>
+                                <span class="list-item-value" id="exercising-equipmentType">bike</span>
+                            </li>
+                            <li>
+                                <span id="exercising-equipmentId" class="equipment-id-tag"
+                                        style="background-color:purple;color:white;font-size:0.8em;padding:0.25em;border-radius:5px;"
+                                        >[fitness equipment id]</span>    
+                                <span id="exercising-equipmentName">[fitness equipment name]</span>    
                             </li>
                         </ul>
                     </div>
