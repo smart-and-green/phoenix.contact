@@ -6,25 +6,18 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.example.nfctest.MainActivity" >
+    tools:context="com.example.nfctest.MainActivity"
+    android:background="#FFFFFF" >
 
-    <ScrollView
-        android:id="@+id/scrollView1"
+    
+
+    <ImageView
+        android:id="@+id/imageView1"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" >
-
-            <TextView
-                android:id="@+id/proc_tips"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Let your mobile phone touch the exercise equipment!" />
-
-        </LinearLayout>
-    </ScrollView>
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/scrollView1"
+        android:src="@drawable/nfc_connection" />
 
 </RelativeLayout>
