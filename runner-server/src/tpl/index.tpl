@@ -135,7 +135,8 @@
                     <span style="float:left;margin-left:8em;">
                         <p id="label-keepRunning" style="display:none;font-size:1.8em;">Keep running</p>
                         <p id="label-dailySentence" style="display:none;font-size:0.7em;">
-                            a sentence every day.a sentence every daya sentence every daya sentence every daya sentence every daya sentence every day
+                            The whole world is a tuxedo and you are a pair of brown shoes.
+                                    -- George Gobel
                         </p>
                     </span>
                 </div>
@@ -160,7 +161,9 @@
             </div>
             <div data-role="content">
                 <img  width="30%" height="30%" alt="runner" src="logo/logo-laucher.png" />
-                <p>App for user to access our system. Thanks.</p>
+                <p>
+                    App for user to access our system. Thanks.
+                </p>
             </div>
         </div>
 
@@ -456,9 +459,9 @@
                 <div id="exercise-timer" style="display:none;">
                     <div>
                         <center>
-                            <span id="exercise-duration-hour" class="em-tips-timer-minhour">0</span><small class="em-tips-timer-minhour">h </small>
-                            <span id="exercise-duration-min" class="em-tips-timer-minhour">0</span><small class="em-tips-timer-minhour">m </small>
-                            <span id="exercise-duration-sec" class="em-tips-timer-sec">0</span><small class="em-tips-timer-sec">s </small>
+                            <span id="exercise-duration-hour" class="em-tips-timer-minhour">0</span><small><small class="em-tips-timer-minhour">h </small></small>
+                            <span id="exercise-duration-min" class="em-tips-timer-minhour">0</span><small><small class="em-tips-timer-minhour">m </small></small>
+                            <span id="exercise-duration-sec" class="em-tips-timer-sec">0</span><small><small class="em-tips-timer-sec">s </small></small>
                         </center>
                     </div>
                     <div id="Exercise-equipment-info" style="margin-top:1em">
