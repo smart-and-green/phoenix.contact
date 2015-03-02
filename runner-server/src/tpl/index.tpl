@@ -157,12 +157,15 @@
 
         <div data-role="page" id="about">
             <div data-role="header">
-                <h1>About this app</h1>
+                <h1>About this project</h1>
             </div>
             <div data-role="content">
-                <img  width="30%" height="30%" alt="runner" src="logo/logo-laucher.png" />
-                <p>
-                    App for user to access our system. Thanks.
+                <img width="30%" height="30%" alt="runner" src="logo/logo-laucher.png" style="float:left;" />
+                <p style="margin-left:8em;font-size:0.8em;">
+                    The project is a combination of energy conservation,environmental protection,and the Internet and social communication,which makes fitness more fun and more meaningful.
+                </p>
+                <p style="margin-left:8em;font-size:0.8em;">
+                    It advocates a new concept of fitness and a new lifestyle. Sharing your exercise outcomes with your friends, and make some contribution to our energy shortage Earth!
                 </p>
             </div>
         </div>
