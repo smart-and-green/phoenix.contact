@@ -29,45 +29,64 @@ public class NfcProcActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_nfc_proc);
-
-		pendingIntent = PendingIntent.getActivity(this, 0, new Intent(this,
-				getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
-		IntentFilter ndef = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
-		try {
-			ndef.addDataType("*/*");
-		} catch (MalformedMimeTypeException e) {
-			throw new RuntimeException("fail", e);
-		}
-		intentFilters = new IntentFilter[] { ndef };
-
-		techLists = new String[][] { new String[] { MifareClassic.class
-				.getName() } };
-
+		
+		Log.d("NfcProcActivity", "onCreate");
 		nfcAdapter = NfcAdapter.getDefaultAdapter(this);
 		if (nfcAdapter == null) {
 			// NFC not available on this device
-			Log.d("NfcProc", "nfc unavailable");
+			Log.d("NfcProcActivity", "nfc unavailable");
 
 			Intent result_intent = new Intent();
 			result_intent.putExtra("result", NfcPlugin.NFC_RESULT_ERROR);
 			result_intent.putExtra("reason", "NFC unavailable on this device.");
 			setResult(Activity.RESULT_FIRST_USER, result_intent);
+			synchronized (this) {
+				try {
+					// to avoid finish this activity too early before NfcPlugin being asleep
+					// so wait about 10ms
+					wait(10);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			
 			finish();
-		}
-
-		if (!nfcAdapter.isEnabled()) {
+			Log.d("NfcProcActivity", "finish this activity was invoked.");
+		} else if (!nfcAdapter.isEnabled()) {
+			Log.d("NfcProcActivity", "nfc available but not enabled.");
 			Intent result_intent = new Intent();
 			result_intent.putExtra("result", NfcPlugin.NFC_RESULT_ERROR);
 			result_intent.putExtra("reason", "please enable the NFC first.");
 			setResult(Activity.RESULT_FIRST_USER, result_intent);
+			synchronized (this) {
+				try {
+					// to avoid finish this activity too early before NfcPlugin being asleep
+					// so wait about 10ms
+					wait(10);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
 			finish();
-		}
-
-		password = getIntent().getByteArrayExtra("password");
-		command = getIntent().getIntExtra("command", NfcPlugin.NO_REQUEST);
-		tagWriteIntent = (TagWriteIntent) getIntent().getSerializableExtra("tagWriteIntent");
-		
-		//tips.setText(command);
+		} else {
+			Log.d("NfcProcActivity", "nfc available and enabled.");
+			pendingIntent = PendingIntent.getActivity(this, 0, new Intent(this,
+					getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+			IntentFilter ndef = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
+			try {
+				ndef.addDataType("*/*");
+			} catch (MalformedMimeTypeException e) {
+				throw new RuntimeException("fail", e);
+			}
+			intentFilters = new IntentFilter[] { ndef };
+	
+			techLists = new String[][] { new String[] { MifareClassic.class
+					.getName() } };
+			
+			password = getIntent().getByteArrayExtra("password");
+			command = getIntent().getIntExtra("command", NfcPlugin.NO_REQUEST);
+			tagWriteIntent = (TagWriteIntent) getIntent().getSerializableExtra("tagWriteIntent");
+		}		
 	}
 
 	@Override

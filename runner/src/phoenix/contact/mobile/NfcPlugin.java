@@ -57,7 +57,7 @@ public class NfcPlugin extends CordovaPlugin {
 
 		boolean actionMatched = false;
 		if (action.equals(READ) || action.equals(READ_THEN_WRITE)) {
-			Log.d("NfcPlugin", "read a tag");
+			Log.d("NfcPlugin", "read tag command");
 			actionMatched = true;
 			intent.putExtra("command", "read");
 			requestCode |= READ_REQUEST;
@@ -98,7 +98,9 @@ public class NfcPlugin extends CordovaPlugin {
 		activity.startActivityForResult(intent, requestCode);
 		
 		// wait for activity result back
+		Log.d("NfcPlugin", "ready to sleep.");
 		sleep();
+		Log.d("NfcPlugin", "now has just been asleep.");
 		
 		if (!isCanceled) {
 			JSONObject jsonObj = new JSONObject();
@@ -117,6 +119,7 @@ public class NfcPlugin extends CordovaPlugin {
 				callbackContext.success(jsonObj);
 			} else {
 				jsonObj.put("reason", reasonIfError);
+				Log.i("NfcPlugin", "(reason is) " + reasonIfError);
 				callbackContext.error(jsonObj);
 			}
 		} 
@@ -129,6 +132,7 @@ public class NfcPlugin extends CordovaPlugin {
 		Log.d("NfcPlugin", "result back!");
 		if (resultCode == Activity.RESULT_CANCELED) {
 			isCanceled = true;
+			
 		} else if (resultCode == Activity.RESULT_FIRST_USER) {
 			result = intent.getIntExtra("result", NfcPlugin.NFC_RESULT_ERROR);
 			if ((requestCode & READ_REQUEST) != 0) {
