@@ -8,7 +8,7 @@
 var CO2_REDUCTION_GRAM_PER_1kWh = 997.0;
 var CO2_REDUCTION_GRAM_PER_1kJ = 0.27694;
 
-var SERVER_ADDRESS = "http://192.168.1.104:8080";
+var SERVER_ADDRESS = "http://45.56.92.243:8080";
 
 function secondsToDurationStr(seconds) {
     var sec = parseInt(seconds % 60);

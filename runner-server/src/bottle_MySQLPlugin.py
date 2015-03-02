@@ -47,7 +47,7 @@ class MySQLPlugin(object):
 
         def wrapper(*args, **kwargs):
             # Connect to the database
-            db = MySQLdb.connect("10.141.90.240", "phoenix", "phoenix-remote-login",dbfile,charset="utf8")
+            db = MySQLdb.connect("localhost", "phoenix", "phoenix-remote-login",dbfile,charset="utf8")
                        
             #db = sqlite3.connect(dbfile)
             # This enables column access by name: row['column_name']

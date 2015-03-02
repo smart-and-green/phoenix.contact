@@ -42,6 +42,11 @@ def server_tpl(path):
 @app.route('/logo/<path>')
 def server_logo(path):
     return static_file(path, root='logo')
+
+@app.route('/download')
+def server_download():
+    return static_file('runner.apk', root='../../runner/bin/',download=True)
+   
 #---------------------------------------------
 
 mysql = MySQLPlugin(dbfile='phoenix')
@@ -698,7 +703,7 @@ debug(True)
 #run(app=app, server='gevent', host='127.0.0.1', port=8080, interval=1, reloader=False, quiet=False, plugins=None, debug=True, listener=("", 8080), handler_class=WebSocketHandler)
 #===========================================================================================================================================
 if __name__ == "__main__":
-    run(host="127.0.0.1", port=8080)
+    run(host="127.0.0.1", port=8888)
 else:
     application = app
 #=============================================================================================================================================
