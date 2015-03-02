@@ -15,10 +15,10 @@ public class MainActivity extends CordovaActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		// super.loadUrl("file:///android_asset/www/login.html");
-		super.loadUrl("http://192.168.1.104:8080/index");
+		//super.loadUrl("http://192.168.1.104:8080/index");
 		
 		// remote server test
-		// super.loadUrl("http://45.56.92.243:8080");
+		super.loadUrl("http://45.56.92.243:8080/index");
 	}
 
 	@Override
