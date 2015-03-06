@@ -47,19 +47,19 @@
                                 $("#userNameHead").text(userData.name);
                                 
                                 $("#duration-summary").text(secondsToDurationStr(userData.summary.duration));
-                                $("#energy-summary").text(userData.summary.energy);
+                                $("#energy-summary").text((userData.summary.energy * 1.0).toFixed(1));
                                 $("#co2-summary").text((userData.summary.energy * CO2_REDUCTION_GRAM_PER_1kWh).toFixed(2));   // 此处修改换算公式
                                 $("#energy-rank-summary").text(userData.summary.globalRank);
 
                                 $("#duration-average").text(secondsToDurationStr(userData.average.duration));
-                                $("#energy-average").text(userData.average.energy);
+                                $("#energy-average").text((userData.average.energy * 1.0).toFixed(2));
                                 $("#co2-average").text((userData.average.energy * CO2_REDUCTION_GRAM_PER_1kWh).toFixed(2));
                                 $("#energy-rank-average").text(userData.average.globalRank);
 
                                 // 如果上个月有记录，则显示出来 
                                 if (userData.lastMonthSummary) {
                                     $("#duration-lastMonth").text(secondsToDurationStr(userData.lastMonthSummary.duration));
-                                    $("#energy-lastMonth").text(userData.lastMonthSummary.energy);
+                                    $("#energy-lastMonth").text((userData.lastMonthSummary.energy * 1.0).toFixed(2));
                                     $("#co2-lastMonth").text((userData.lastMonthSummary.energy * CO2_REDUCTION_GRAM_PER_1kWh).toFixed(2));
                                     if (userData.lastMonthSummary.globalRank == 0) {
                                         $("#energy-rank-lastMonth").text("-");
@@ -71,7 +71,7 @@
                                 // 如果这个月有锻炼记录，则显示出来
                                 if (userData.thisMonthSummary) {
                                     $("#duration-thisMonth").text(secondsToDurationStr(userData.thisMonthSummary.duration));
-                                    $("#energy-thisMonth").text(userData.thisMonthSummary.energy);
+                                    $("#energy-thisMonth").text((userData.thisMonthSummary.energy * 1.0).toFixed(2));
                                     $("#co2-thisMonth").text((userData.thisMonthSummary.energy * CO2_REDUCTION_GRAM_PER_1kWh).toFixed(2));
                                     if (userData.thisMonthSummary.globalRank == 0) {
                                         $("#energy-rank-thisMonth").text("-");
@@ -216,7 +216,7 @@
                     console.log(code);
 
                     // 从code中读出EquipmentId
-                    EquipmentId = "X000";
+                    EquipmentId = "A001";
                     
                     $.ajax({
                         url: SERVER_ADDRESS + "/getExEquipmentData",
@@ -227,7 +227,7 @@
                         crossDomain: true,
                         success: function(result) {
 
-                            // 当检测到该锻炼设备是有效的之后再开始锻炼
+                            // 当检测到 该锻炼设备是有效的之后再开始锻炼
                             if (result.success) {
                                 // disable the history button to prevent stopping exercise recording
                                 $("#user-ex-history-btn").fadeOut();
@@ -286,12 +286,12 @@
                         userid: userid,
                         startTime: startTimeStr,
                         endTime: endTimeStr,
-                        energy: 0.12,
-                        peakPower: 450.1,
-                        efficiency: 0.78,
-                        peakCurrent: 12.1,
-                        peakVoltage: 45.7,
-                        co2reduced: 123.1,
+                        energy: (60 * (endTime - startTime) / 1000 / 3600000).toFixed(4),
+                        peakPower: 0,
+                        efficiency: 50,
+                        peakCurrent: 0,
+                        peakVoltage: 0,
+                        co2reduced: ((60 * (startTime - endTime) / 1000 / 3600000) * CO2_REDUCTION_GRAM_PER_1kWh).toFixed(2),
                         equipmentid: EquipmentId
                     };
                     uploadExRecord(exerciseData);
@@ -305,10 +305,10 @@
                     $("#duration-hour-thisEx").text(parseInt(durationInMin / 60));
                     $("#duration-min-thisEx").text(parseInt(durationInMin % 60));
 
-                    $("#energy-thisTime").text(exerciseData.energy);
+                    $("#energy-thisTime").text((exerciseData.energy * 1.0).toFixed(3));
                     $("#peak-power-thisTime").text(exerciseData.peakPower);
                     $("#efficiency-thisTime").text(exerciseData.efficiency);
-                    $("#co2-reduced-thisTime").text((exerciseData.energy * CO2_REDUCTION_GRAM_PER_1kWh).toFixed(3));  // 换算得到
+                    $("#co2-reduced-thisTime").text((exerciseData.energy * CO2_REDUCTION_GRAM_PER_1kWh).toFixed(1));  // 换算得到
                     
                     // display the dashboard
                     $("#exercise-achievement-thisTime").slideDown();
