@@ -45,8 +45,13 @@ def server_logo(path):
 
 @app.route('/download')
 def server_download():
-    return static_file('runner.apk', root='../../runner/bin/',download=True)
+    return template("tpl/download")
+    #return static_file('runner.apk', root='../../runner/bin/',download=True)
    
+@app.route('/download/<filename>')
+def apk_download_remote(filename):
+    return static_file(filename + ".apk", root='../../runner/bin/', download=True) 
+
 #---------------------------------------------
 
 mysql = MySQLPlugin(dbfile='phoenix')

@@ -150,7 +150,8 @@
                 </form>
                 <p id="login-result" style="color:red;"></p>
                 <p style="font-size:0.7em;">
-                    <span style="color:red;">(?) </span><a href="#" >Find my password back.</a>
+                    <span style="color:red;">(?) </span><a href="#" >Find my password back.</a><br>
+                    <span>Latest build at 2nd Mar 2015 22:22 (GMT+8).</span>
                 </p>
             </div>
     	</div>

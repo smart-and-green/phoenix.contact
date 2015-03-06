@@ -31,55 +31,55 @@
 
 .logo-achievement {
     background-image: url('../logo/logo-achievement.png'); 
-    background-size: 10% 10%;
+    background-size: 8% 8%;
     background-repeat: no-repeat;
 }
 
 .logo-duration {
     background-image: url('../logo/logo-duration.png'); 
-    background-size: 10% 10%;
+    background-size: 8% 8%;
     background-repeat: no-repeat;
 }
 
 .logo-energy {
     background-image: url('../logo/logo-energy.png'); 
-    background-size: 10% 10%;
+    background-size: 8% 8%;
     background-repeat: no-repeat;
 }
 
 .logo-co2reduction {
     background-image: url('../logo/logo-co2reduction.png'); 
-    background-size: 10% 10%;
+    background-size: 8% 8%;
     background-repeat: no-repeat;
 }
 
 .logo-power {
     background-image: url('../logo/logo-power.png'); 
-    background-size: 10% 10%;
+    background-size: 8% 8%;
     background-repeat: no-repeat;
 }
 
 .logo-current {
     background-image: url('../logo/logo-current.png'); 
-    background-size: 10% 10%;
+    background-size: 8% 8%;
     background-repeat: no-repeat;
 }
 
 .logo-voltage {
     background-image: url('../logo/logo-voltage.png'); 
-    background-size: 10% 10%;
+    background-size: 8% 8%;
     background-repeat: no-repeat;
 }
 
 .logo-efficiency {
     background-image: url('../logo/logo-efficiency.png'); 
-    background-size: 10% 10%;
+    background-size: 8% 8%;
     background-repeat: no-repeat;
 }
 
 .logo-address {
     background-image: url('../logo/logo-address.png'); 
-    background-size: 10% 10%;
+    background-size: 8% 8%;
     background-repeat: no-repeat;
 }
 
@@ -95,15 +95,15 @@
 }
 
 .list-item-value {
-    height: 30px;
-    line-height: 30px;
+    height: 24px;
+    line-height: 24px;
     margin-left: 40px;
     vertical-align: middle;
 }
 
 .list-item-value-noicon {
-    height: 30px;
-    line-height: 30px;
+    height: 24px;
+    line-height: 24px;
     margin-left: 0px;
     vertical-align: middle;
 }
